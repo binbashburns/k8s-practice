@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKAD Practice — Matt's Dojo</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --accent: #326CE5;
+    --accent2: #5b8df5;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --code-bg: #111318;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Layout */
+  .app { display: grid; grid-template-columns: 260px 1fr; grid-template-rows: 56px 1fr; height: 100vh; }
+  .topbar { grid-column: 1 / -1; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 12px; z-index: 10; }
+  .topbar h1 { font-size: 15px; font-weight: 700; color: var(--accent2); }
+  .topbar .k8s-logo { font-size: 20px; }
+  .topbar .score-badge { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: var(--muted); }
+  .topbar .score-badge span { color: var(--green); font-weight: 700; }
+
+  /* Sidebar */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px 0; }
+  .sidebar-section { padding: 6px 16px 4px; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: var(--muted); text-transform: uppercase; }
+  .topic-btn { display: flex; align-items: center; width: 100%; padding: 8px 16px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 13px; text-align: left; gap: 8px; transition: all .15s; }
+  .topic-btn:hover { background: var(--surface2); color: var(--text); }
+  .topic-btn.active { background: rgba(50,108,229,.15); color: var(--accent2); border-right: 2px solid var(--accent); }
+  .topic-btn .count { margin-left: auto; font-size: 11px; background: var(--surface2); border-radius: 10px; padding: 1px 7px; }
+  .topic-btn.active .count { background: rgba(50,108,229,.3); color: var(--accent2); }
+  .progress-mini { height: 3px; background: var(--border); border-radius: 2px; margin: 0 16px 8px; overflow: hidden; }
+  .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+  .failed-badge { font-size: 9px; background: rgba(231,76,60,.2); color: var(--red); border-radius: 3px; padding: 1px 5px; font-weight: 700; }
+
+  /* Main */
+  .main { overflow-y: auto; padding: 24px; }
+  .topic-header { margin-bottom: 20px; }
+  .topic-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .topic-header .docs-link { font-size: 12px; color: var(--accent2); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .topic-header .docs-link:hover { text-decoration: underline; }
+  .topic-header .subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Docs Nav panel */
+  .docs-nav { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .docs-nav h3 { font-size: 12px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+  .docs-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .docs-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+  .docs-item .path { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .docs-item a { font-size: 12px; color: var(--accent2); text-decoration: none; }
+  .docs-item a:hover { text-decoration: underline; }
+  .docs-item .search-tip { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
+
+  /* Question cards */
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+  .q-card.failed { border-left: 3px solid var(--red); }
+  .q-card.known { border-left: 3px solid var(--green); opacity: .6; }
+  .q-header { padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .q-num { font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface2); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 1px; }
+  .q-title { flex: 1; font-size: 14px; font-weight: 600; line-height: 1.4; }
+  .q-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .tag-fail { background: rgba(231,76,60,.2); color: var(--red); }
+  .tag-hard { background: rgba(243,156,18,.15); color: var(--yellow); }
+  .tag-med  { background: rgba(50,108,229,.15); color: var(--accent2); }
+  .tag-easy { background: rgba(46,204,113,.15); color: var(--green); }
+  .chevron { color: var(--muted); transition: transform .2s; font-size: 12px; padding-top: 2px; }
+  .q-card.open .chevron { transform: rotate(90deg); }
+  .q-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .q-card.open .q-body { display: block; }
+  .q-scenario { font-size: 13px; color: var(--text); line-height: 1.65; padding: 12px 0 10px; }
+  .q-scenario code { background: var(--code-bg); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-family: var(--font-mono); font-size: 12px; color: #a8d8ea; }
+
+  /* Hint panel */
+  .hint-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--accent); color: var(--accent2); border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; margin-bottom: 8px; transition: all .15s; }
+  .hint-btn:hover { background: rgba(50,108,229,.15); }
+  .hint-panel { background: #0d1a3a; border: 1px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; display: none; }
+  .hint-panel.show { display: block; }
+  .hint-panel h4 { font-size: 11px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .hint-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 5px; font-size: 12px; }
+  .hint-label { color: var(--muted); min-width: 70px; flex-shrink: 0; }
+  .hint-row a { color: var(--accent2); text-decoration: none; word-break: break-all; }
+  .hint-row a:hover { text-decoration: underline; }
+  .hint-search { font-style: italic; color: #7ab3e0; }
+
+  /* Answer panel */
+  .answer-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(46,204,113,.1); border: 1px solid var(--green); color: var(--green); border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; margin-bottom: 8px; margin-left: 8px; transition: all .15s; }
+  .answer-btn:hover { background: rgba(46,204,113,.2); }
+  .answer-panel { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; display: none; }
+  .answer-panel.show { display: block; }
+  .answer-panel h4 { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+  .answer-panel .explanation { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+  .answer-panel .explanation .highlight { color: var(--yellow); font-weight: 700; }
+  pre { font-family: var(--font-mono); font-size: 11.5px; line-height: 1.6; color: #cdd6f4; overflow-x: auto; white-space: pre; }
+  .yaml-comment { color: #6c7086; }
+  .yaml-key { color: #89b4fa; }
+  .yaml-val { color: #a6e3a1; }
+  .yaml-str { color: #f5c2e7; }
+  .yaml-important { color: #f38ba8; font-weight: 700; }
+
+  /* Mark buttons */
+  .mark-row { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .mark-known { background: rgba(46,204,113,.1); border: 1px solid var(--green); color: var(--green); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .mark-known:hover { background: rgba(46,204,113,.25); }
+  .mark-review { background: rgba(243,156,18,.1); border: 1px solid var(--yellow); color: var(--yellow); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .mark-review:hover { background: rgba(243,156,18,.2); }
+  .mark-status { font-size: 11px; color: var(--muted); margin-left: auto; align-self: center; }
+
+  /* Home / overview */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all .15s; }
+  .overview-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .overview-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .overview-card .oc-meta { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .overview-card .oc-progress { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .overview-card .oc-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+  .overview-card .oc-stats { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .alert-box { background: rgba(231,76,60,.1); border: 1px solid rgba(231,76,60,.4); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+  .alert-box strong { color: var(--red); }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 20px; padding: 5px 13px; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: rgba(50,108,229,.2); border-color: var(--accent); color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="k8s-logo">⎈</span>
+    <h1>CKAD Practice Dojo</h1>
+    <div style="font-size:12px;color:var(--muted);margin-left:8px">Matt's exam is Friday 5 PM</div>
+    <div class="score-badge">Known: <span id="known-count">0</span> / <span id="total-count">0</span></div>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <button class="topic-btn active" onclick="showTopic('home')" id="nav-home">
+      <span>🏠</span> Overview
+    </button>
+    <div class="sidebar-section" style="margin-top:8px">CKAD Topics</div>
+    <!-- dynamically filled -->
+  </nav>
+
+  <!-- Main -->
+  <main class="main" id="main">
+    <!-- dynamically filled -->
+  </main>
+</div>
+
+<script>
+// ────────────────────────────────────────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────────────────────────────────────────
+const TOPICS = [
+  {
+    id: 'network-policy',
+    label: 'Network Policies',
+    icon: '🔒',
+    docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
+    docsPath: 'Concepts → Services, LB & Networking → Network Policies',
+    searchTip: 'Search "network policy" — look for the podSelector + ingress/egress spec example',
+    subtitle: 'You deleted a NetPol instead of adding an allow rule. Never again.',
+    docLinks: [
+      { label: 'NetworkPolicy concept', url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/', tip: 'Search: networkpolicy podSelector' },
+      { label: 'Declare policy', url: 'https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/', tip: 'Search: declare network policy' },
+    ]
+  },
+  {
+    id: 'ingress',
+    label: 'Ingress',
+    icon: '🌐',
+    docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/ingress/',
+    docsPath: 'Concepts → Services, LB & Networking → Ingress',
+    searchTip: 'Search "ingress" — the spec.rules[].http.paths[].backend.service.port section',
+    subtitle: 'You used the NodePort (30093) instead of the Service ClusterIP port (8080).',
+    docLinks: [
+      { label: 'Ingress concept', url: 'https://kubernetes.io/docs/concepts/services-networking/ingress/', tip: 'Find: spec.rules, backend.service.port' },
+      { label: 'IngressClass', url: 'https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class', tip: 'Search: ingressClassName' },
+      { label: 'kubectl create ingress', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_ingress/', tip: 'Imperative create command' },
+    ]
+  },
+  {
+    id: 'cronjob',
+    label: 'CronJobs & Jobs',
+    icon: '⏱',
+    docsUrl: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/',
+    docsPath: 'Concepts → Workloads → Workload Management → CronJob',
+    searchTip: 'Search "cronjob" — find jobTemplate.spec section for activeDeadlineSeconds',
+    subtitle: 'activeDeadlineSeconds and backoffLimit go under jobTemplate.spec — NOT spec.',
+    docLinks: [
+      { label: 'CronJob', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/', tip: 'Look for jobTemplate.spec' },
+      { label: 'Job', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/job/', tip: 'backoffLimit, activeDeadlineSeconds' },
+      { label: 'kubectl create cronjob', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_cronjob/', tip: 'Imperative command' },
+    ]
+  },
+  {
+    id: 'observability',
+    label: 'Observability',
+    icon: '👁',
+    docsUrl: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/',
+    docsPath: 'Tasks → Configure Pods → Configure Liveness, Readiness, Startup Probes',
+    searchTip: 'Search "liveness probe" — note the 3 types: exec, httpGet, tcpSocket',
+    subtitle: 'Lowest scoring CKAD domain. Probe types, kubectl top, log redirection.',
+    docLinks: [
+      { label: 'Liveness/Readiness probes', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/', tip: 'All 3 probe types here' },
+      { label: 'kubectl logs', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/', tip: 'Search: kubectl logs' },
+      { label: 'kubectl top', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_top/', tip: 'kubectl top pods --sort-by' },
+      { label: 'Debug pods', url: 'https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/', tip: 'Events and describe patterns' },
+    ]
+  },
+  {
+    id: 'design-build',
+    label: 'App Design & Build',
+    icon: '🏗',
+    docsUrl: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/',
+    docsPath: 'Concepts → Workloads → Pods → Init Containers',
+    searchTip: 'Search "sidecar" or "init container" — look at spec.initContainers',
+    subtitle: 'Multi-container patterns, init containers, sidecars, CRDs, Security Contexts.',
+    docLinks: [
+      { label: 'Init containers', url: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/', tip: 'spec.initContainers' },
+      { label: 'Sidecar containers', url: 'https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/', tip: 'restartPolicy: Always in initContainers' },
+      { label: 'ConfigMaps', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/', tip: 'envFrom, env.valueFrom' },
+      { label: 'Secrets', url: 'https://kubernetes.io/docs/concepts/configuration/secret/', tip: 'secretKeyRef, volume mount' },
+      { label: 'Security Context', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/security-context/', tip: 'capabilities, runAsUser' },
+      { label: 'CRDs', url: 'https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/', tip: 'openAPIV3Schema, subresources' },
+    ]
+  },
+  {
+    id: 'deployment',
+    label: 'App Deployment',
+    icon: '🚀',
+    docsUrl: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/',
+    docsPath: 'Concepts → Workloads → Workload Management → Deployments',
+    searchTip: 'Search "rollingupdate" — strategy.rollingUpdate.maxSurge/maxUnavailable',
+    subtitle: 'RollingUpdate, blue/green, Helm, kubectl rollout.',
+    docLinks: [
+      { label: 'Deployment', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/', tip: 'rollingUpdate strategy, rollback' },
+      { label: 'kubectl rollout', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/', tip: 'undo, history, status' },
+      { label: 'Helm quickstart', url: 'https://helm.sh/docs/intro/quickstart/', tip: 'helm install, lint, ls' },
+      { label: 'RBAC', url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/', tip: 'Role, ClusterRole, non-resource URLs' },
+    ]
+  },
+];
+
+// ── QUESTIONS ────────────────────────────────────────────────────────────────
+const QUESTIONS = [
+  // ── NETWORK POLICY ────────────────────────────────────────────────────────
+  {
+    id: 'np-1', topic: 'network-policy', difficulty: 'fail',
+    title: 'Fix failed connectivity: allow webapp-color → secure-pod on TCP 80',
+    scenario: `A <code>default-deny</code> NetworkPolicy exists in the <code>default</code> namespace. Pods named <code>secure-pod</code> (label <code>run: secure-pod</code>) cannot receive traffic. Create a NetworkPolicy that allows the pod <code>webapp-color</code> (label <code>name: webapp-color</code>) to reach <code>secure-pod</code> on TCP port 80. Do NOT delete the existing policy.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
+      path: 'Concepts → Services, LB & Networking → Network Policies',
+      tip: 'Find the "podSelector" + "ingress.from.podSelector" example. The key is spec.podSelector (who this applies to) vs ingress.from.podSelector (who is allowed in).'
+    },
+    answer: {
+      explanation: `The existing default-deny blocks everything. You need to <span class="highlight">add</span> a new allow policy — never delete the deny. The podSelector targets secure-pod. The ingress.from.podSelector allows webapp-color.`,
+      yaml: `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webapp-to-secure
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      run: secure-pod        # THIS policy applies to pods with this label
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          name: webapp-color # allow traffic FROM pods with this label
+    ports:
+    - protocol: TCP
+      port: 80`
+    }
+  },
+  {
+    id: 'np-2', topic: 'network-policy', difficulty: 'hard',
+    title: 'Edit existing NetworkPolicy to add a new allowed source',
+    scenario: `A NetworkPolicy <code>netpol-ckad13-svcn</code> already allows ingress from pods with label <code>tier: server</code>. Edit it to ALSO allow ingress from pods with label <code>access: allowed</code>. Do not change or remove the existing rule.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource',
+      path: 'Concepts → Network Policies → NetworkPolicy resource',
+      tip: 'In the ingress.from list, each separate dash (-) item is an OR condition. Add a new - podSelector item to add another allowed source.'
+    },
+    answer: {
+      explanation: `In the <code>ingress.from</code> list, items at the same dash level are OR conditions. Just add a second <code>- podSelector</code> entry.`,
+      yaml: `spec:
+  podSelector:
+    matchLabels:
+      app: kk-app
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          tier: server         # existing rule — do not remove
+    - podSelector:             # ADD THIS (OR condition)
+        matchLabels:
+          access: allowed`
+    }
+  },
+  {
+    id: 'np-3', topic: 'network-policy', difficulty: 'medium',
+    title: 'Create NetworkPolicy: allow only pods with label access=redis to reach a Redis deployment on port 6379',
+    scenario: `A <code>redis</code> Deployment (label <code>app: redis</code>) exists. Create a NetworkPolicy named <code>redis-access</code> that allows only pods with label <code>access: redis</code> to reach it on TCP 6379. All other ingress to Redis pods should be blocked.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
+      path: 'Concepts → Network Policies',
+      tip: 'podSelector on the policy = which pods are protected (app: redis). ingress.from.podSelector = who can reach them (access: redis). policyTypes must include Ingress.'
+    },
+    answer: {
+      explanation: `The policy's podSelector must match the Redis pods (app: redis, NOT role: redis — check the actual pod labels). The ingress from rule uses access: redis.`,
+      yaml: `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-access
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: redis             # protects pods with this label
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          access: redis      # only these pods can connect
+    ports:
+    - protocol: TCP
+      port: 6379`
+    }
+  },
+  {
+    id: 'np-4', topic: 'network-policy', difficulty: 'hard',
+    title: 'Add Egress rule allowing DNS but not breaking existing ingress',
+    scenario: `Pods with label <code>app: backend</code> need to reach a database (label <code>app: db</code>) on port 5432. Add an Egress NetworkPolicy. Make sure pods can still resolve DNS (UDP/TCP port 53).`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/#egress',
+      path: 'Concepts → Network Policies → Egress section',
+      tip: 'Add TWO egress rules: one to the DB pod on 5432, and one with no podSelector but ports: [{port: 53, protocol: UDP}] for DNS. Without the DNS rule, pods cannot resolve service names.'
+    },
+    answer: {
+      explanation: `<span class="highlight">DNS trap:</span> Once you add an Egress policyType, ALL egress is blocked except what you explicitly allow. Always add UDP 53 for DNS.`,
+      yaml: `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-egress
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: db
+    ports:
+    - protocol: TCP
+      port: 5432
+  - ports:               # Allow DNS — ALWAYS include this!
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53`
+    }
+  },
+
+  // ── INGRESS ───────────────────────────────────────────────────────────────
+  {
+    id: 'ing-1', topic: 'ingress', difficulty: 'fail',
+    title: 'Multi-host Ingress: route two hostnames to two services',
+    scenario: `Create an Ingress named <code>ingress-vh-routing</code>. Route:<br>• <code>watch.ecom-store.com/video</code> → <code>video-service</code><br>• <code>apparels.ecom-store.com/wear</code> → <code>apparels-service</code><br><br>Add annotation <code>nginx.ingress.kubernetes.io/rewrite-target: /</code>. The IngressController is exposed on NodePort 30093 externally. The services run on port 8080 internally.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/ingress/#types-of-ingress',
+      path: 'Concepts → Ingress → Name based virtual hosting',
+      tip: 'Find the "Name based virtual hosting" example. The key mistake: backend.service.port.number is the SERVICE port (8080), NOT the IngressController NodePort (30093). Run "kubectl get svc" to see the right number.'
+    },
+    answer: {
+      explanation: `<span class="highlight">The critical mistake you made:</span> You used port 30093 in the backend. That's the NodePort on the IngressController's Service — it's external-facing. The backend port must be the Service's internal ClusterIP port.`,
+      yaml: `apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-vh-routing
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: watch.ecom-store.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /video
+        backend:
+          service:
+            name: video-service
+            port:
+              number: 8080  # Service port, NOT the 30093 NodePort!
+  - host: apparels.ecom-store.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /wear
+        backend:
+          service:
+            name: apparels-service
+            port:
+              number: 8080`
+    }
+  },
+  {
+    id: 'ing-2', topic: 'ingress', difficulty: 'medium',
+    title: 'Single-path Ingress with ingressClassName and ssl-redirect annotation',
+    scenario: `Applications run in the <code>global-space</code> namespace. Create Ingress <code>ingress-resource-xnz</code> exposing <code>/eat</code> → <code>food-service:8080</code>. Use ingress class <code>nginx</code>. Add annotations: <code>rewrite-target: /</code> and <code>ssl-redirect: "false"</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class',
+      path: 'Concepts → Ingress → IngressClass',
+      tip: 'The ingressClassName field goes under spec, not annotations. The imperative command "kubectl create ingress" supports --class and --annotation flags directly.'
+    },
+    answer: {
+      explanation: `Use <code>spec.ingressClassName: nginx</code> for the class. The two annotations go in metadata.annotations. Imperative command shown too.`,
+      yaml: `# Imperative (fastest on exam):
+kubectl create ingress ingress-resource-xnz \\
+  --namespace global-space \\
+  --rule='/eat=food-service:8080' \\
+  --annotation='nginx.ingress.kubernetes.io/rewrite-target=/' \\
+  --annotation='nginx.ingress.kubernetes.io/ssl-redirect=false' \\
+  --class=nginx
+
+---
+# YAML version:
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-resource-xnz
+  namespace: global-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /eat
+        pathType: Prefix
+        backend:
+          service:
+            name: food-service
+            port:
+              number: 8080`
+    }
+  },
+  {
+    id: 'ing-3', topic: 'ingress', difficulty: 'hard',
+    title: 'Troubleshoot: IngressController crashing with "default-backend-service not found"',
+    scenario: `The IngressController pod in <code>ingress-nginx</code> namespace keeps crashing. Logs show: <code>No service with name default-backend-service found in namespace default</code>. The actual backend service <code>default-backend-service</code> lives in the <code>green-space</code> namespace. Fix this without recreating the Ingress resource.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/',
+      path: 'Concepts → Ingress Controllers',
+      tip: 'The IngressController deployment has a --default-backend-service arg. Get the deployment YAML, edit the arg to use green-space/default-backend-service, delete the old deployment, and apply the fixed one.'
+    },
+    answer: {
+      explanation: `The IngressController deployment has a CLI arg specifying the backend namespace. Save → Delete → Edit → Re-apply.`,
+      yaml: `# 1. Save the deployment
+kubectl get -n ingress-nginx deploy ingress-nginx-controller -o yaml > ing-ctrl.yaml
+
+# 2. Delete it
+kubectl delete -n ingress-nginx deploy ingress-nginx-controller
+
+# 3. Edit ing-ctrl.yaml — find the args section:
+#    Change:
+#      - --default-backend-service=default/default-backend-service
+#    To:
+#      - --default-backend-service=green-space/default-backend-service
+
+# 4. Apply
+kubectl apply -f ing-ctrl.yaml
+
+# 5. Fix Ingress paths if needed
+kubectl edit ingress <name> -n green-space
+# Update paths /app1 → /app-wear, /app2 → /app-video`
+    }
+  },
+
+  // ── CRONJOB ───────────────────────────────────────────────────────────────
+  {
+    id: 'cj-1', topic: 'cronjob', difficulty: 'fail',
+    title: 'CronJob: every 1 min, backoffLimit 25, activeDeadlineSeconds 20',
+    scenario: `Create a CronJob named <code>dice</code> that runs every minute. Image: <code>kodekloud/throw-dice</code>. It should:<br>• complete once (<code>completions: 1</code>)<br>• retry up to 25 times (<code>backoffLimit: 25</code>)<br>• fail if not done within 20 seconds (<code>activeDeadlineSeconds: 20</code>)<br>• use <code>restartPolicy: Never</code>`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cronjob-spec',
+      path: 'Concepts → CronJob → CronJob spec',
+      tip: 'In the docs, look for the "jobTemplate.spec" section. backoffLimit and activeDeadlineSeconds are Job fields — they live under jobTemplate.spec, NOT the top-level CronJob spec. This is the exact mistake that failed your LL2 Q2.'
+    },
+    answer: {
+      explanation: `<span class="highlight">The nesting trap:</span> CronJob.spec has schedule + jobTemplate. Job fields (backoffLimit, activeDeadlineSeconds) live inside jobTemplate.spec — one level deeper than you might expect.`,
+      yaml: `apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dice
+spec:
+  schedule: "*/1 * * * *"   # every 1 minute
+  jobTemplate:
+    spec:
+      completions: 1
+      backoffLimit: 25          # HERE (jobTemplate.spec)
+      activeDeadlineSeconds: 20 # HERE (jobTemplate.spec)
+      template:
+        spec:
+          containers:
+          - name: dice
+            image: kodekloud/throw-dice
+          restartPolicy: Never  # must be Never or OnFailure in Jobs`
+    }
+  },
+  {
+    id: 'cj-2', topic: 'cronjob', difficulty: 'medium',
+    title: 'CronJob: every 30 minutes, list processes with ps -eaf (run in shell)',
+    scenario: `In namespace <code>ckad-job</code>, create a CronJob named <code>simple-python-job</code> that runs every 30 minutes. Image: <code>python</code>. Run the command <code>ps -eaf</code> inside a shell (<code>/bin/sh -c</code>).`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/',
+      path: 'Concepts → CronJob',
+      tip: 'The command must be run in a shell so it can be parsed. Use command: ["/bin/sh", "-c", "ps -eaf"]. Cron schedule for every 30 min: "*/30 * * * *"'
+    },
+    answer: {
+      explanation: `When a command needs shell features (pipes, env vars, etc.) use <code>/bin/sh -c "..."</code>. The imperative command also works here.`,
+      yaml: `# Imperative (fastest):
+kubectl create cronjob simple-python-job \\
+  -n ckad-job \\
+  --image=python \\
+  --schedule="*/30 * * * *" \\
+  -- /bin/sh -c "ps -eaf"
+
+---
+# YAML:
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: simple-python-job
+  namespace: ckad-job
+spec:
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: simple-python-job
+            image: python
+            command:
+            - /bin/sh
+            - -c
+            - ps -eaf
+          restartPolicy: OnFailure`
+    }
+  },
+  {
+    id: 'cj-3', topic: 'cronjob', difficulty: 'medium',
+    title: 'Job: compute pi to 1024 places, backoffLimit 5, activeDeadlineSeconds 100',
+    scenario: `In namespace <code>ckad-job</code>, create a Job named <code>very-long-pi</code>. Image: <code>perl:5.34.0</code>. Command: <code>perl -Mbignum=bpi -wle 'print bpi(1024)'</code>. Max 5 retries. Fail if not done in 100 seconds.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/job/',
+      path: 'Concepts → Workload Management → Job',
+      tip: 'In the Job spec (not CronJob), backoffLimit and activeDeadlineSeconds sit directly under spec — they are Job fields. Look for the "Writing a Job spec" section in the docs.'
+    },
+    answer: {
+      explanation: `In a standalone Job, backoffLimit and activeDeadlineSeconds are at <code>spec</code> level — no jobTemplate wrapper needed (that wrapper is only for CronJobs).`,
+      yaml: `apiVersion: batch/v1
+kind: Job
+metadata:
+  name: very-long-pi
+  namespace: ckad-job
+spec:
+  backoffLimit: 5              # direct on spec (it's a Job, not CronJob)
+  activeDeadlineSeconds: 100   # direct on spec
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl:5.34.0
+        command:
+        - perl
+        - -Mbignum=bpi
+        - -wle
+        - print bpi(1024)
+      restartPolicy: Never`
+    }
+  },
+
+  // ── OBSERVABILITY ─────────────────────────────────────────────────────────
+  {
+    id: 'obs-1', topic: 'observability', difficulty: 'fail',
+    title: 'Fix pod not ready: wrong probe type (httpGet with exec-style config)',
+    scenario: `A pod template <code>goproxy.yaml</code> fails to apply with: <code>unknown field "command" in HTTPGetAction</code>. The liveness probe is typed as <code>httpGet</code> but configured with exec-style <code>command</code> fields. Fix the probe type. Then the pod restarts because <code>initialDelaySeconds: 1</code> is too short — the healthcheck file isn't created for 3 seconds. Fix that too.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command',
+      path: 'Tasks → Configure Pods → Liveness, Readiness, Startup Probes → Define a liveness command',
+      tip: 'There are 3 probe types: httpGet (needs path+port), exec (needs command list), tcpSocket (needs port). They cannot be mixed. Change httpGet to exec. Then increase initialDelaySeconds so it fires after the healthcheck file exists.'
+    },
+    answer: {
+      explanation: `Two bugs: (1) probe type mismatch — changed <code>httpGet</code> to <code>exec</code>. (2) initialDelaySeconds too short — increased from 1 to 5.`,
+      yaml: `# BEFORE (broken):
+livenessProbe:
+  httpGet:         # wrong type!
+    command:
+    - cat
+    - /healthcheck
+
+# AFTER (fixed):
+livenessProbe:
+  exec:            # correct type for a command check
+    command:
+    - cat
+    - /healthcheck
+  initialDelaySeconds: 5   # was 1 — healthcheck file created after 3s
+  periodSeconds: 10`
+    }
+  },
+  {
+    id: 'obs-2', topic: 'observability', difficulty: 'medium',
+    title: 'Add HTTP readinessProbe to existing pod at /ready on port 8080',
+    scenario: `Update pod <code>analytics-app</code> (image: <code>kodekloud/webapp-delayed-start</code>) with an HTTP readiness probe. Path: <code>/ready</code>, port: <code>8080</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes',
+      path: 'Tasks → Configure Pods → Probes → Define readiness probes',
+      tip: 'Under spec.containers[].readinessProbe, use httpGet with path and port. Since pods cannot be patched in-place, use "kubectl replace -f pod.yaml --force" to delete and recreate.'
+    },
+    answer: {
+      explanation: `Pods cannot be edited in-place for most spec fields. Get the YAML, add the probe, then use <code>kubectl replace --force</code>.`,
+      yaml: `# 1. Get current YAML
+kubectl get pod analytics-app -o yaml > analytics-app.yaml
+
+# 2. Add readinessProbe under the container:
+spec:
+  containers:
+  - name: simple-webapp
+    image: kodekloud/webapp-delayed-start
+    ports:
+    - containerPort: 8080
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+      initialDelaySeconds: 10
+      periodSeconds: 5
+
+# 3. Replace (delete + recreate)
+kubectl replace -f analytics-app.yaml --force`
+    }
+  },
+  {
+    id: 'obs-3', topic: 'observability', difficulty: 'medium',
+    title: 'Add livenessProbe (exec) + readinessProbe (httpGet) to fix NotReady pod',
+    scenario: `Pod <code>nginx1401</code> (namespace <code>dev1401</code>) is not Ready. The readiness probe already exists but the container also needs a liveness probe. Add a liveness probe: run <code>ls /var/www/html/file_check</code>, starting after 10 seconds, every 60 seconds.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command',
+      path: 'Tasks → Probes → Define a liveness command',
+      tip: 'exec probe uses command as a list. initialDelaySeconds controls when the first probe fires. periodSeconds controls frequency.'
+    },
+    answer: {
+      explanation: `exec probe runs a shell command. If the command exits non-zero, the container is restarted.`,
+      yaml: `livenessProbe:
+  exec:
+    command:
+    - ls
+    - /var/www/html/file_check
+  initialDelaySeconds: 10    # wait 10s before first probe
+  periodSeconds: 60          # check every 60s`
+    }
+  },
+  {
+    id: 'obs-4', topic: 'observability', difficulty: 'easy',
+    title: 'Find pod with highest memory usage using kubectl top, then get its memory limit',
+    scenario: `Three pods <code>hulk</code>, <code>thor</code>, and <code>ironman</code> are running on <code>cluster1</code>. Identify which has highest memory usage. Then get the memory limit configured for that pod and write <code>PodName,MemoryLimit</code> to <code>/root/pod-metrics</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_top/',
+      path: 'Reference → kubectl → kubectl top',
+      tip: 'kubectl top pods --sort-by=memory shows memory descending. Then use kubectl get pod <name> -o jsonpath or kubectl describe to get the limit.'
+    },
+    answer: {
+      explanation: `Two steps: (1) find the top memory consumer, (2) get the limit from the pod spec.`,
+      yaml: `# 1. Find highest memory pod
+kubectl top pods --sort-by=memory
+
+# 2. Get memory limit
+kubectl get pod hulk -o jsonpath='{.spec.containers[].resources.limits.memory}'
+# or
+kubectl describe pod hulk | grep -A5 Limits
+
+# 3. Write output
+echo "hulk,512Mi" > /root/pod-metrics`
+    }
+  },
+  {
+    id: 'obs-5', topic: 'observability', difficulty: 'easy',
+    title: 'Filter pod logs by WARNING and redirect to a file',
+    scenario: `Pod <code>dev-pod-dind-878516</code> has multiple containers. Filter the logs of container <code>log-x</code> for lines containing WARNING and redirect the output to <code>/opt/dind-878516_logs.txt</code> on the controlplane node.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/',
+      path: 'Reference → kubectl → kubectl logs',
+      tip: 'kubectl logs <pod> -c <container> to specify a container. Pipe to grep to filter. Redirect with > to a file.'
+    },
+    answer: {
+      explanation: `One-liner combining kubectl logs + grep + redirect.`,
+      yaml: `kubectl logs dev-pod-dind-878516 -c log-x | grep WARNING > /opt/dind-878516_logs.txt
+
+# Verify it worked:
+cat /opt/dind-878516_logs.txt | head -5`
+    }
+  },
+
+  // ── APP DESIGN & BUILD ────────────────────────────────────────────────────
+  {
+    id: 'db-1', topic: 'design-build', difficulty: 'medium',
+    title: 'Sidecar container: write date to shared volume every 5 seconds',
+    scenario: `Create pod <code>ckad-web-pod</code> in namespace <code>ckad-multi-containers</code> with an <code>emptyDir</code> volume <code>my-vol</code>. Main container <code>web-app</code> runs <code>nginx:1.16</code>, mounting <code>my-vol</code> at <code>/usr/share/nginx/html</code>. Sidecar <code>log-container</code> runs <code>alpine</code>, writes <code>$(date) Hi I am from Sidecar container</code> to <code>/var/log/index.html</code> every 5 seconds.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/',
+      path: 'Concepts → Workloads → Pods → Sidecar Containers',
+      tip: 'In K8s 1.29+, sidecars are defined in spec.initContainers with restartPolicy: Always. This makes them start before main containers and restart independently. The key difference from a regular initContainer is the restartPolicy field.'
+    },
+    answer: {
+      explanation: `Sidecar pattern: <code>restartPolicy: Always</code> inside initContainers makes it a true sidecar (K8s 1.29+). Both containers share the emptyDir volume.`,
+      yaml: `apiVersion: v1
+kind: Pod
+metadata:
+  name: ckad-web-pod
+  namespace: ckad-multi-containers
+spec:
+  volumes:
+  - name: my-vol
+    emptyDir: {}
+  containers:
+  - name: web-app
+    image: nginx:1.16
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: my-vol
+      mountPath: /usr/share/nginx/html
+  initContainers:
+  - name: log-container
+    image: alpine
+    restartPolicy: Always    # makes it a sidecar (K8s 1.29+)
+    command:
+    - /bin/sh
+    - -c
+    - while true; do echo "$(date -u) Hi I am from Sidecar container" >> /var/log/index.html; sleep 5; done
+    volumeMounts:
+    - name: my-vol
+      mountPath: /var/log`
+    }
+  },
+  {
+    id: 'db-2', topic: 'design-build', difficulty: 'medium',
+    title: 'Multi-container pod: two containers, env var in second container',
+    scenario: `Create pod <code>cuda-pod</code> in namespace <code>ckad-multi-containers</code>. Container 1: <code>alpha</code>, image <code>alpine</code>, env <code>release=stable</code>, must stay running. Container 2: <code>beta</code>, image <code>nginx:1.17</code>, containerPort 8080.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/',
+      path: 'Tasks → Inject Data → Define an environment variable',
+      tip: 'For alpine to stay running, it needs a sleep command. env vars use the spec.containers[].env list with name/value pairs. Both containers go under spec.containers — no special field needed.'
+    },
+    answer: {
+      explanation: `Alpine has no long-running process by default — add <code>command: ["/bin/sh", "-c", "sleep 3600"]</code> or it exits immediately.`,
+      yaml: `apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-pod
+  namespace: ckad-multi-containers
+  labels:
+    environment: dev
+spec:
+  containers:
+  - name: alpha
+    image: alpine
+    command: ["/bin/sh", "-c", "sleep 3600"]  # keep it running!
+    env:
+    - name: release
+      value: stable
+  - name: beta
+    image: nginx:1.17
+    ports:
+    - containerPort: 8080`
+    }
+  },
+  {
+    id: 'db-3', topic: 'design-build', difficulty: 'medium',
+    title: 'ConfigMap + pod: env var from ConfigMap, emptyDir volume for logs',
+    scenario: `Create a ConfigMap <code>time-config</code> in namespace <code>dvl1987</code> with key <code>TIME_FREQ=10</code>. Create pod <code>time-check</code> using image <code>busybox</code>. The container should run: <code>while true; do date; sleep $TIME_FREQ; done &gt; /opt/time/time-check.log</code>. Mount an emptyDir at <code>/opt/time</code>. Get TIME_FREQ from the ConfigMap.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data',
+      path: 'Tasks → Configure Pods → ConfigMaps → Define env vars from ConfigMap',
+      tip: 'Use env.valueFrom.configMapKeyRef to pull a single key from a ConfigMap. The command list format is important: use ["/bin/sh", "-c", "command string"] for shell commands. emptyDir goes in volumes, not referenced by storageClassName.'
+    },
+    answer: {
+      explanation: `The command redirects to a file — it must be in shell form (<code>/bin/sh -c</code>). The env is sourced from the ConfigMap via <code>configMapKeyRef</code>.`,
+      yaml: `---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-config
+  namespace: dvl1987
+data:
+  TIME_FREQ: "10"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: time-check
+  namespace: dvl1987
+spec:
+  volumes:
+  - name: log-volume
+    emptyDir: {}
+  containers:
+  - name: time-check
+    image: busybox
+    command:
+    - /bin/sh
+    - -c
+    - while true; do date; sleep $TIME_FREQ; done > /opt/time/time-check.log
+    env:
+    - name: TIME_FREQ
+      valueFrom:
+        configMapKeyRef:
+          name: time-config
+          key: TIME_FREQ
+    volumeMounts:
+    - name: log-volume
+      mountPath: /opt/time`
+    }
+  },
+  {
+    id: 'db-4', topic: 'design-build', difficulty: 'hard',
+    title: 'CRD: create a CustomResourceDefinition with schema validation',
+    scenario: `Create a CRD for resource kind <code>Foo</code> (plural <code>foos</code>) in group <code>samplecontroller.example.com</code>, version <code>v1alpha1</code>. Schema: <code>deploymentName</code> (string) and <code>replicas</code> (integer, min 1, max 5). Include a <code>status</code> subresource. Namespace scoped.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/',
+      path: 'Tasks → Extend Kubernetes → CRDs',
+      tip: 'Find the "Validation" section. The schema goes under spec.versions[].schema.openAPIV3Schema. Status subresource is enabled by spec.versions[].subresources.status: {}. The CRD name must be plural.group format: foos.samplecontroller.example.com'
+    },
+    answer: {
+      explanation: `CRD name = <code>plural.group</code>. Schema validation goes in openAPIV3Schema. status subresource unlocks <code>kubectl get foo/status</code>.`,
+      yaml: `apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: foos.samplecontroller.example.com  # must be plural.group
+spec:
+  group: samplecontroller.example.com
+  scope: Namespaced
+  names:
+    kind: Foo
+    plural: foos
+    singular: foo
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              deploymentName:
+                type: string
+              replicas:
+                type: integer
+                minimum: 1
+                maximum: 5
+          status:
+            type: object
+            properties:
+              availableReplicas:
+                type: integer
+    subresources:
+      status: {}    # enables status subresource`
+    }
+  },
+  {
+    id: 'db-5', topic: 'design-build', difficulty: 'medium',
+    title: 'Security context: privileged pod + add SYS_TIME capability',
+    scenario: `Update pod <code>app-sec-kff3345</code> to run as root (<code>runAsNonRoot: false</code>) and add capability <code>SYS_TIME</code>. The pod runs image <code>ubuntu</code> with <code>sleep 4800</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container',
+      path: 'Tasks → Configure Pods → Security Context → Set capabilities',
+      tip: 'securityContext goes under spec.containers[]. capabilities.add takes a list of strings. When recreating the pod, do NOT copy the auto-generated volumeMounts for service account tokens — those will fail.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Gotcha from your notes:</span> When you exported and re-applied the pod YAML, it included a volumeMount for a kube-api-access token. That volume doesn't exist in the new pod spec and caused an error. Strip auto-generated fields when recreating pods.`,
+      yaml: `apiVersion: v1
+kind: Pod
+metadata:
+  name: app-sec-kff3345
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: ["sleep", "4800"]
+    securityContext:
+      runAsNonRoot: false      # allow root
+      capabilities:
+        add: ["SYS_TIME"]      # add capability
+    # Do NOT include auto-generated volumeMounts from kubectl get -o yaml`
+    }
+  },
+
+  // ── APP DEPLOYMENT ────────────────────────────────────────────────────────
+  {
+    id: 'dep-1', topic: 'deployment', difficulty: 'medium',
+    title: 'RollingUpdate Deployment: maxSurge 1, maxUnavailable 2, then rollback',
+    scenario: `Create Deployment <code>nginx-deploy</code> with 4 replicas, image <code>nginx:1.16</code>, RollingUpdate with maxSurge 1 and maxUnavailable 2. Upgrade to <code>nginx:1.17</code>. Once all pods are updated, roll back to the previous version.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment',
+      path: 'Concepts → Deployments → Rolling Update Deployment',
+      tip: 'strategy.type: RollingUpdate, then strategy.rollingUpdate.maxSurge and maxUnavailable. For rollback: "kubectl rollout undo deployment/<name>" goes back one revision.'
+    },
+    answer: {
+      explanation: `Create with the strategy, update with set image, rollback with rollout undo.`,
+      yaml: `# Create
+kubectl create deploy nginx-deploy \\
+  --image=nginx:1.16 --replicas=4 \\
+  -o yaml --dry-run=client > deploy.yaml
+# (edit strategy in deploy.yaml, then apply)
+
+# Or full YAML:
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2
+
+# Update image
+kubectl set image deployment/nginx-deploy nginx=nginx:1.17
+
+# Watch rollout
+kubectl rollout status deployment/nginx-deploy
+
+# Roll back
+kubectl rollout undo deployment/nginx-deploy`
+    }
+  },
+  {
+    id: 'dep-2', topic: 'deployment', difficulty: 'hard',
+    title: 'Blue/Green: route 70% traffic to blue, 30% to green using replica counts',
+    scenario: `Create deployments <code>blue-apd</code> (image <code>webapp-color:v1</code>, label <code>type-one: blue</code>) and <code>green-apd</code> (image <code>webapp-color:v2</code>, label <code>type-two: green</code>). Both pods must have label <code>version: v1</code>. Create service <code>route-apd-svc</code> (NodePort, port 8080) selecting on <code>version: v1</code>. Route 70% to blue, 30% to green using replica counts (total = 10 pods).`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#scaling-a-deployment',
+      path: 'Concepts → Deployments → Scaling a Deployment',
+      tip: 'The service selects on the SHARED label (version: v1), not deployment-specific labels. Traffic splits proportionally to pod count. 70/30 = 7 blue replicas, 3 green replicas.'
+    },
+    answer: {
+      explanation: `The shared label <code>version: v1</code> is the key. The service sees all 10 pods and routes randomly — replica count controls the percentage.`,
+      yaml: `# blue-apd: 7 replicas = 70%
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      type-one: blue
+      version: v1
+  template:
+    metadata:
+      labels:
+        type-one: blue
+        version: v1         # shared label — service selects this
+    spec:
+      containers:
+      - image: kodekloud/webapp-color:v1
+        name: blue-apd
+---
+# green-apd: 3 replicas = 30%
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      type-two: green
+      version: v1
+  template:
+    metadata:
+      labels:
+        type-two: green
+        version: v1         # same shared label
+---
+# Service selects ALL pods with version: v1
+spec:
+  type: NodePort
+  selector:
+    version: v1             # catches both blue and green pods
+  ports:
+  - port: 8080
+    targetPort: 8080`
+    }
+  },
+  {
+    id: 'dep-3', topic: 'deployment', difficulty: 'hard',
+    title: 'Canary: reduce new deployment below 40% traffic without increasing existing replicas',
+    scenario: `Two deployments: <code>ruby-alpha-apd</code> (5 replicas) and <code>cube-alpha-apd</code> (5 replicas) both selected by service <code>alpha-apd-service</code>. Currently ~50% goes to each. Reduce traffic to <code>cube-alpha-apd</code> below 40%. Do NOT increase replicas of <code>ruby-alpha-apd</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#scaling-a-deployment',
+      path: 'Concepts → Deployments → Scaling',
+      tip: 'Total = 10 pods, 50/50 split. To get cube-alpha-apd below 40%, scale it down. With ruby at 5, cube needs to be ≤ 3 for cube to be ≤ 37.5% of total. Scale cube to 2: 2/7 = ~28.5%.'
+    },
+    answer: {
+      explanation: `Math: ruby=5 fixed. For cube < 40%: cube/(5+cube) < 0.4 → cube < 3.33 → max cube=3. Scale to 2 for safety.`,
+      yaml: `kubectl scale deployment cube-alpha-apd \\
+  --replicas=2 \\
+  -n alpha-ns-apd
+
+# Verify: 2/(5+2) = 28.5% — well below 40%`
+    }
+  },
+  {
+    id: 'dep-4', topic: 'deployment', difficulty: 'hard',
+    title: 'Helm: fix chart issues and install to specific namespace',
+    scenario: `A Helm chart is at <code>/opt/webapp-color-apd/</code>. Fix these issues and install as release <code>webapp-color-apd</code> in namespace <code>frontend-apd</code>: (1) Deployment apiVersion is wrong, (2) service template has a typo in a variable, (3) appVersion should be 1.20.0, (4) replicaCount should be 3, (5) service type should be NodePort.`,
+    hint: {
+      url: 'https://helm.sh/docs/helm/helm_lint/',
+      path: 'helm.sh → Helm Commands → helm lint',
+      tip: 'Run "helm lint ./chart-dir" to find template errors before installing. Check Chart.yaml for appVersion, values.yaml for replicaCount and service.type. Template variables like {{ .Values.service.name }} are case-sensitive.'
+    },
+    answer: {
+      explanation: `Always lint first. Create the namespace before installing.`,
+      yaml: `# 1. Create namespace if needed
+kubectl create ns frontend-apd
+
+# 2. Lint to find errors
+cd /opt
+helm lint ./webapp-color-apd/
+# will show: wrong apiVersion, typo in template variable
+
+# 3. Fix Chart.yaml
+#    appVersion: "1.20.0"
+
+# 4. Fix values.yaml
+#    replicaCount: 3
+#    service:
+#      type: NodePort
+
+# 5. Fix templates/deployment.yaml
+#    apiVersion: apps/v1  (not just v1)
+
+# 6. Fix template variable typo in service.yaml
+#    {{ .Values.service.name }}  (check exact casing)
+
+# 7. Lint again to confirm clean
+helm lint ./webapp-color-apd/
+
+# 8. Install
+helm install webapp-color-apd -n frontend-apd ./webapp-color-apd
+
+# 9. Verify
+helm ls -n frontend-apd`
+    }
+  },
+
+  // ── MOCK EXAM 5 ───────────────────────────────────────────────────────────
+  {
+    id: 'me5-1', topic: 'cronjob', difficulty: 'medium',
+    title: 'CronJob: print a message every hour, restartPolicy OnFailure',
+    scenario: `In namespace <code>ckad-job</code> on <code>cluster2</code>, create a CronJob named <code>learning-every-hour</code> that runs every hour at minute 0 and prints: <code>I will pass CKAD certification</code>. Use image <code>alpine</code>. If the container fails for any reason, it should restart automatically.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/',
+      path: 'Concepts → Workload Management → CronJob',
+      tip: '"Every hour at minute 0" = "0 * * * *" (first field is minutes). restartPolicy: OnFailure means the container will restart on non-zero exit — use this when you want automatic retry but not Always (which is invalid in Jobs).'
+    },
+    answer: {
+      explanation: `<span class="highlight">restartPolicy choices in Jobs/CronJobs:</span> <code>Never</code> = don't restart, just mark failed. <code>OnFailure</code> = restart the container in-place if it exits non-zero. <code>Always</code> is NOT valid in Job/CronJob pods.`,
+      yaml: `apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: learning-every-hour
+  namespace: ckad-job
+spec:
+  schedule: "0 * * * *"       # minute 0 of every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: learning-every-hour
+            image: alpine
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - echo I will pass CKAD certification
+          restartPolicy: OnFailure  # NOT Always — that's invalid in Jobs`
+    }
+  },
+  {
+    id: 'me5-2', topic: 'deployment', difficulty: 'medium',
+    title: 'kubectl set image + scale deployment + record new image to file via SSH',
+    scenario: `Deployment <code>results-apd</code> runs in namespace <code>dashboard-apd</code> on <code>cluster2</code>. Update its container image to <code>nginx:1.23.3</code>. SSH into <code>cluster2-controlplane</code> and write the new image name to <code>/root/records/new-image-records.txt</code>. Then scale the deployment to 4 replicas.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_image/',
+      path: 'Reference → kubectl → kubectl set image',
+      tip: 'First use "kubectl describe deploy" to find the exact container name — you need it for set image. Syntax: kubectl set image deploy/<name> <container-name>=<image>. Then SSH to the node and use echo + redirect to write the file. Create the directory first if it doesn\'t exist.'
+    },
+    answer: {
+      explanation: `Three distinct steps: update image, write record to file (requires SSH), scale. Finding the container name from describe is the step people miss.`,
+      yaml: `# 1. Find the container name
+kubectl describe -n dashboard-apd deploy results-apd | grep -A5 "Pod Template"
+# Look for: Container: results-apd-container (or whatever it is)
+
+# 2. Update the image
+kubectl set image -n dashboard-apd deploy results-apd \\
+  results-apd-container=nginx:1.23.3
+
+# 3. SSH to controlplane and record the image
+ssh cluster2-controlplane
+mkdir -p /root/records
+echo "nginx:1.23.3" > /root/records/new-image-records.txt
+exit
+
+# 4. Scale to 4
+kubectl scale deployment -n dashboard-apd results-apd --replicas=4
+
+# 5. Verify
+kubectl get deployments,pods -n dashboard-apd`
+    }
+  },
+  {
+    id: 'me5-3', topic: 'deployment', difficulty: 'medium',
+    title: 'Helm: repo update then upgrade chart version and set replicaCount',
+    scenario: `A Helm release named <code>lvm-crystal-apd</code> (nginx chart) is deployed on <code>cluster3</code> in namespace <code>crystal-apd-ns</code>. The team has pushed a new chart version. Update the Helm repo, then upgrade the release to chart version <code>18.1.15</code> with <code>replicaCount=2</code>. Do this on the <code>cluster3-controlplane</code> node.`,
+    hint: {
+      url: 'https://helm.sh/docs/helm/helm_upgrade/',
+      path: 'helm.sh → Helm Commands → helm upgrade',
+      tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata — without it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
+    },
+    answer: {
+      explanation: `<span class="highlight">helm repo update is mandatory</span> before upgrading to a new version — it syncs the local index with the remote repo. Without it, Helm won't know the new version exists.`,
+      yaml: `# SSH to the controlplane first
+ssh cluster3-controlplane
+
+# 1. Update repo cache
+helm repo update
+
+# 2. Upgrade with specific chart version and overridden value
+helm upgrade lvm-crystal-apd lvm-crystal-apd/nginx \\
+  --version=18.1.15 \\
+  --namespace=crystal-apd-ns \\
+  --set replicaCount=2
+
+# 3. Verify
+helm ls -n crystal-apd-ns
+kubectl get pods -n crystal-apd-ns`
+    }
+  },
+  {
+    id: 'me5-4', topic: 'deployment', difficulty: 'medium',
+    title: 'RBAC: Role restricted to a specific named ConfigMap instance',
+    scenario: `Create a Role named <code>configmap-updater</code> in namespace <code>ckad21-auth2-aecs</code>. It should grant <code>update</code> and <code>get</code> permissions on <code>configmaps</code>, but ONLY for the specific ConfigMap named <code>ckad-cnfmp-aecs</code> — not all ConfigMaps.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources',
+      path: 'Reference → RBAC Authorization → Referring to resources',
+      tip: 'kubectl create role supports --resource-name to restrict a rule to a specific named instance of a resource. Without it, the role grants access to ALL configmaps. In YAML this maps to the "resourceNames" field in the rules list.'
+    },
+    answer: {
+      explanation: `<span class="highlight">resourceNames</span> is the key field — it scopes the permission to a specific named resource instance. Without it, the role applies to all configmaps in the namespace.`,
+      yaml: `# Imperative (one-liner):
+kubectl create role configmap-updater \\
+  --namespace=ckad21-auth2-aecs \\
+  --resource=configmaps \\
+  --resource-name=ckad-cnfmp-aecs \\
+  --verb=update,get
+
+---
+# What the resulting YAML looks like:
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: configmap-updater
+  namespace: ckad21-auth2-aecs
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["ckad-cnfmp-aecs"]  # restricts to this specific instance
+  verbs: ["update", "get"]`
+    }
+  },
+  {
+    id: 'me5-5', topic: 'observability', difficulty: 'hard',
+    title: 'Debug pod stuck in Init:StartError — fix missing shell interpreter in init container command',
+    scenario: `Pod <code>ckad-frontend-pod</code> in namespace <code>ckad-21-production</code> on <code>cluster3</code> is stuck in <code>Init:StartError</code>. Find the root cause and fix it to bring the pod to Running state.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/',
+      path: 'Tasks → Debug Applications → Debug Init Containers',
+      tip: 'Init:StartError means the init container process failed to start — the binary or interpreter doesn\'t exist or wasn\'t specified. Run "kubectl describe pod" and look at the init container\'s Last State / Message. Then get the pod YAML and check the command field — if you have a shell command without /bin/sh -c, the container can\'t run it.'
+    },
+    answer: {
+      explanation: `The init container had a shell command without the <code>/bin/sh -c</code> interpreter prefix. The container runtime tried to execute the string directly as a binary — which fails. Fix: prepend <code>/bin/sh</code> and <code>-c</code> to the command list.`,
+      yaml: `# 1. Check pod status
+kubectl get pods -n ckad-21-production
+
+# 2. Describe to see the error
+kubectl describe pod ckad-frontend-pod -n ckad-21-production
+# Look for: "OCI runtime create failed: unable to start container process"
+# or: "exec: command not found"
+
+# 3. Get the YAML
+kubectl get pod ckad-frontend-pod -n ckad-21-production -o yaml > fix-pod.yaml
+
+# 4. Find the init container command — it probably looks like:
+#   command:
+#   - "some shell command string"     ← missing interpreter!
+
+# 5. Fix it:
+#   command:
+#   - /bin/sh        ← add interpreter
+#   - -c             ← add -c flag
+#   - "some shell command string"
+
+# 6. Delete and recreate
+kubectl delete pod ckad-frontend-pod -n ckad-21-production
+kubectl apply -f fix-pod.yaml
+
+# 7. Verify
+kubectl get pods -n ckad-21-production`
+    }
+  },
+];
+
+// ────────────────────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────────────────────
+let currentTopic = 'home';
+let filterMode   = 'all';
+const state = JSON.parse(localStorage.getItem('ckad-state') || '{}');
+
+function saveState() {
+  localStorage.setItem('ckad-state', JSON.stringify(state));
+  updateScoreBadge();
+  renderSidebar();
+}
+
+function markCard(id, val) {
+  state[id] = val;
+  saveState();
+  renderMain();
+}
+
+function getTopicProgress(topicId) {
+  const qs = QUESTIONS.filter(q => q.topic === topicId);
+  const known = qs.filter(q => state[q.id] === 'known').length;
+  return { total: qs.length, known };
+}
+
+function updateScoreBadge() {
+  const known = QUESTIONS.filter(q => state[q.id] === 'known').length;
+  document.getElementById('known-count').textContent = known;
+  document.getElementById('total-count').textContent = QUESTIONS.length;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// RENDER SIDEBAR
+// ────────────────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  // Keep static top
+  const existing = sidebar.innerHTML;
+  const start = existing.indexOf('<div class="sidebar-section" style="margin-top:8px">');
+  const staticPart = existing.substring(0, start);
+
+  let html = staticPart + '<div class="sidebar-section" style="margin-top:8px">CKAD Topics</div>';
+  TOPICS.forEach(t => {
+    const prog = getTopicProgress(t.id);
+    const pct  = prog.total ? Math.round(prog.known / prog.total * 100) : 0;
+    const failCount = QUESTIONS.filter(q => q.topic === t.id && q.difficulty === 'fail').length;
+    html += `
+      <button class="topic-btn ${currentTopic === t.id ? 'active' : ''}" onclick="showTopic('${t.id}')" id="nav-${t.id}">
+        <span>${t.icon}</span> ${t.label}
+        ${failCount ? `<span class="failed-badge">FAILED ${failCount}x</span>` : ''}
+        <span class="count">${prog.known}/${prog.total}</span>
+      </button>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>`;
+  });
+  sidebar.innerHTML = html;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// RENDER MAIN
+// ────────────────────────────────────────────────────────────────────────────
+function showTopic(id) {
+  currentTopic = id;
+  filterMode = 'all';
+  renderSidebar();
+  renderMain();
+  document.getElementById('main').scrollTop = 0;
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  if (currentTopic === 'home') {
+    renderHome(main); return;
+  }
+  const topic = TOPICS.find(t => t.id === currentTopic);
+  if (!topic) return;
+  let qs = QUESTIONS.filter(q => q.topic === currentTopic);
+  if (filterMode === 'failed')  qs = qs.filter(q => q.difficulty === 'fail');
+  if (filterMode === 'unknown') qs = qs.filter(q => state[q.id] !== 'known');
+  if (filterMode === 'known')   qs = qs.filter(q => state[q.id] === 'known');
+
+  let html = `
+    <div class="topic-header">
+      <h2>${topic.icon} ${topic.label}</h2>
+      <div class="subtitle">${topic.subtitle}</div>
+    </div>
+    <div class="docs-nav">
+      <h3>📖 Find this in the Docs</h3>
+      <div class="docs-nav-grid">`;
+  topic.docLinks.forEach(dl => {
+    html += `<div class="docs-item">
+      <div class="path">${topic.docsPath}</div>
+      <a href="${dl.url}" target="_blank">↗ ${dl.label}</a>
+      <div class="search-tip">💡 ${dl.tip}</div>
+    </div>`;
+  });
+  html += `</div></div>
+    <div class="filter-row">
+      <button class="filter-btn ${filterMode==='all'?'active':''}" onclick="setFilter('all')">All (${QUESTIONS.filter(q=>q.topic===currentTopic).length})</button>
+      <button class="filter-btn ${filterMode==='failed'?'active':''}" onclick="setFilter('failed')" style="color:var(--red)">Failed (${QUESTIONS.filter(q=>q.topic===currentTopic&&q.difficulty==='fail').length})</button>
+      <button class="filter-btn ${filterMode==='unknown'?'active':''}" onclick="setFilter('unknown')">Needs Practice (${QUESTIONS.filter(q=>q.topic===currentTopic&&state[q.id]!=='known').length})</button>
+      <button class="filter-btn ${filterMode==='known'?'active':''}" onclick="setFilter('known')" style="color:var(--green)">Known ✓ (${QUESTIONS.filter(q=>q.topic===currentTopic&&state[q.id]==='known').length})</button>
+    </div>`;
+
+  if (qs.length === 0) {
+    html += `<div class="empty-state"><div class="icon">✅</div><p>No questions in this filter.</p></div>`;
+  } else {
+    qs.forEach((q, i) => {
+      const isKnown = state[q.id] === 'known';
+      const needsReview = state[q.id] === 'review';
+      const statusText = isKnown ? '✅ Marked as known' : needsReview ? '⚠ Needs review' : '';
+      html += `
+      <div class="q-card ${q.difficulty === 'fail' ? 'failed' : ''} ${isKnown ? 'known' : ''}" id="card-${q.id}">
+        <div class="q-header" onclick="toggleCard('${q.id}')">
+          <span class="q-num">Q${i+1}</span>
+          <span class="q-title">${q.title}</span>
+          <span class="q-meta">
+            ${q.difficulty === 'fail' ? '<span class="tag tag-fail">YOUR FAIL</span>' : ''}
+            ${q.difficulty === 'hard' ? '<span class="tag tag-hard">HARD</span>' : ''}
+            ${q.difficulty === 'medium' ? '<span class="tag tag-med">MEDIUM</span>' : ''}
+            ${q.difficulty === 'easy' ? '<span class="tag tag-easy">EASY</span>' : ''}
+          </span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="q-body" id="body-${q.id}">
+          <div class="q-scenario">${q.scenario}</div>
+          <button class="hint-btn" onclick="toggleHint('${q.id}')">📖 Show Docs Hint</button>
+          <button class="answer-btn" onclick="toggleAnswer('${q.id}')">✅ Show Answer</button>
+          <div class="hint-panel" id="hint-${q.id}">
+            <h4>Where to find this in the docs</h4>
+            <div class="hint-row"><span class="hint-label">Path:</span> <span>${q.hint.path}</span></div>
+            <div class="hint-row"><span class="hint-label">URL:</span> <a href="${q.hint.url}" target="_blank">${q.hint.url}</a></div>
+            <div class="hint-row"><span class="hint-label">Tip:</span> <span class="hint-search">${q.hint.tip}</span></div>
+          </div>
+          <div class="answer-panel" id="answer-${q.id}">
+            <h4>Answer</h4>
+            <div class="explanation">${q.answer.explanation}</div>
+            <pre>${escapeHtml(q.answer.yaml)}</pre>
+          </div>
+          <div class="mark-row">
+            <button class="mark-known" onclick="markCard('${q.id}','known')">✅ Got it</button>
+            <button class="mark-review" onclick="markCard('${q.id}','review')">🔄 Need more practice</button>
+            <span class="mark-status">${statusText}</span>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  main.innerHTML = html;
+}
+
+function renderHome(main) {
+  const failQs = QUESTIONS.filter(q => q.difficulty === 'fail');
+  let html = `
+    <div class="topic-header"><h2>⎈ CKAD Dojo — Overview</h2></div>
+    <div class="alert-box">
+      <strong>Your 3 documented failures</strong><br>
+      LL1 Q2: NetworkPolicy — deleted it instead of adding an allow rule.<br>
+      LL2 Q2: CronJob — activeDeadlineSeconds at wrong YAML level.<br>
+      LL2 Q4: Ingress — used NodePort 30093 as backend port instead of the Service's ClusterIP port 8080.
+    </div>
+    <div class="overview-grid">`;
+  TOPICS.forEach(t => {
+    const prog = getTopicProgress(t.id);
+    const pct  = prog.total ? Math.round(prog.known / prog.total * 100) : 0;
+    const failCount = QUESTIONS.filter(q => q.topic === t.id && q.difficulty === 'fail').length;
+    html += `
+      <div class="overview-card" onclick="showTopic('${t.id}')">
+        <h3>${t.icon} ${t.label}</h3>
+        <div class="oc-meta">${prog.total} questions${failCount ? ` · <span style="color:var(--red)">${failCount} from your fails</span>` : ''}</div>
+        <div class="oc-progress"><div class="oc-fill" style="width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'}"></div></div>
+        <div class="oc-stats"><span>${prog.known} known</span><span>${pct}%</span></div>
+      </div>`;
+  });
+  html += `</div>
+    <div class="docs-nav">
+      <h3>📖 Master Docs Navigation — Find Anything Fast</h3>
+      <div class="docs-nav-grid">
+        <div class="docs-item"><div class="path">Exam search strategy</div><a href="https://kubernetes.io/docs/home/" target="_blank">↗ kubernetes.io/docs (start here)</a><div class="search-tip">💡 Use Ctrl+K or the search box. Search the resource type, not the task.</div></div>
+        <div class="docs-item"><div class="path">YAML scaffolding — fastest method</div><a href="https://kubernetes.io/docs/reference/kubectl/generated/" target="_blank">↗ kubectl reference (imperative commands)</a><div class="search-tip">💡 Generate YAML: kubectl create X --dry-run=client -o yaml</div></div>
+        <div class="docs-item"><div class="path">All resource types</div><a href="https://kubernetes.io/docs/reference/kubernetes-api/" target="_blank">↗ Kubernetes API reference</a><div class="search-tip">💡 Find exact field names and types here</div></div>
+        <div class="docs-item"><div class="path">Quick concepts index</div><a href="https://kubernetes.io/docs/concepts/" target="_blank">↗ Concepts overview</a><div class="search-tip">💡 NetworkPolicy, Ingress, Deployments, Storage all under Concepts</div></div>
+      </div>
+    </div>`;
+  main.innerHTML = html;
+}
+
+function setFilter(mode) {
+  filterMode = mode;
+  renderMain();
+}
+
+function toggleCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  card.classList.toggle('open');
+}
+
+function toggleHint(id) {
+  const panel = document.getElementById(`hint-${id}`);
+  panel.classList.toggle('show');
+}
+
+function toggleAnswer(id) {
+  const panel = document.getElementById(`answer-${id}`);
+  panel.classList.toggle('show');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────────────────────
+updateScoreBadge();
+renderSidebar();
+renderMain();
+</script>
+</body>
+</html>
