@@ -240,6 +240,20 @@ const TOPICS = [
     ]
   },
   {
+    id: 'services',
+    label: 'Services & Networking',
+    icon: '🔌',
+    docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/service/',
+    docsPath: 'Concepts → Services, LB & Networking → Service',
+    searchTip: 'Search "service" — find spec.selector and spec.ports. For ClusterIP: kubectl create service clusterip.',
+    subtitle: 'ClusterIP creation with label selectors, pod IP listing with custom-columns.',
+    docLinks: [
+      { label: 'Service concept', url: 'https://kubernetes.io/docs/concepts/services-networking/service/', tip: 'spec.selector, spec.ports, ClusterIP type' },
+      { label: 'kubectl create service clusterip', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_service_clusterip/', tip: 'kubectl create service clusterip NAME --tcp=port:targetPort' },
+      { label: 'kubectl get custom-columns', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/', tip: '-o custom-columns=\'COL:.jsonpath\' --sort-by=.field' },
+    ]
+  },
+  {
     id: 'deployment',
     label: 'App Deployment',
     icon: '🚀',
@@ -1206,6 +1220,216 @@ rules:
   verbs: ["update", "get"]`
     }
   },
+  // ── MOCK EXAM 6 ───────────────────────────────────────────────────────────
+  {
+    id: 'me6-1', topic: 'design-build', difficulty: 'fail',
+    title: 'Mock Exam 6 Q5: Create pod with init container + main container (both alpine)',
+    scenario: `In namespace <code>ckad-multi-containers</code> on <code>cluster2</code>, create a pod named <code>static-web-server</code> with 2 containers, both using the <code>alpine</code> image.<br><br>
+<strong>Init container</strong> (<code>init-myservice</code>): print <code>Getting main application ready!</code> then sleep <code>10</code> seconds.<br>
+<strong>Main container</strong> (<code>server-container</code>): print <code>Main application is running</code> then sleep <code>3600</code> seconds.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/',
+      path: 'Concepts → Workloads → Pods → Init Containers',
+      tip: 'Init containers go under spec.initContainers (list), main containers under spec.containers. Use command: [sh, -c, "echo ... && sleep N"] to chain the echo and sleep in one container command.'
+    },
+    answer: {
+      explanation: `Init containers run to completion before main containers start. They live under <code>spec.initContainers</code>. Chain the echo and sleep with <code>&amp;&amp;</code> inside <code>sh -c</code>.`,
+      yaml: `kubectl config use-context cluster2
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: static-web-server
+  namespace: ckad-multi-containers
+  labels:
+    app.kubernetes.io/name: static-web-server
+spec:
+  containers:
+  - name: server-container
+    image: alpine
+    command:
+    - sh
+    - -c
+    - echo Main application is running && sleep 3600
+  initContainers:
+  - name: init-myservice
+    image: alpine
+    command:
+    - sh
+    - -c
+    - echo Getting main application ready! && sleep 10`
+    }
+  },
+  {
+    id: 'me6-2', topic: 'network-policy', difficulty: 'fail',
+    title: 'Mock Exam 6 Q12: Troubleshoot — fix service selector mismatch AND overly restrictive egress NetworkPolicy',
+    scenario: `In namespace <code>ns-new-ckad</code> on <code>cluster3</code>, two issues exist:<br><br>
+<strong>Issue 1:</strong> <code>backend-ckad-svcn</code> cannot reach backend pods. Inspect and fix the service selector.<br>
+<strong>Issue 2:</strong> <code>frontend-ckad-svcn</code> is not accessible from backend pods. A NetworkPolicy <code>backend-egress-restricted</code> is blocking traffic — fix it so backends can reach all egress destinations (not just frontend).`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/#egress',
+      path: 'Concepts → Network Policies → Egress',
+      tip: 'For Issue 1: kubectl describe svc backend-ckad-svcn — compare selector labels to actual pod labels (kubectl get pods --show-labels). For Issue 2: kubectl edit netpol backend-egress-restricted — replace the restrictive "to:" egress rule with an empty {} to allow all egress.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Issue 1:</span> Service selector used <code>app: back-end, tier: ckadexam</code> but pods have <code>app: backend, tier: ckad-exam</code>. Fix with kubectl edit svc. <span class="highlight">Issue 2:</span> Replace the to: podSelector egress rule with an empty <code>- {}</code> to allow all egress.`,
+      yaml: `# === Issue 1: Fix service selector ===
+kubectl -n ns-new-ckad describe svc backend-ckad-svcn
+# Selector shows: app=back-end,tier=ckadexam  ← WRONG
+kubectl -n ns-new-ckad get pods --show-labels
+# Pods have: app=backend,tier=ckad-exam
+
+kubectl -n ns-new-ckad edit svc backend-ckad-svcn
+# Change selector to:
+#   selector:
+#     app: backend      # match actual pod label
+#     tier: ckad-exam   # match actual pod label
+
+# Verify:
+kubectl -n ns-new-ckad exec testpod -- curl backend-ckad-svcn
+
+# === Issue 2: Fix egress NetworkPolicy ===
+kubectl -n ns-new-ckad edit netpol backend-egress-restricted
+# Replace the restrictive egress block:
+#   egress:
+#   - to:
+#     - podSelector:
+#         matchLabels:
+#           app: frontend
+#           tier: ckad-exam
+# With a permissive allow-all:
+#   egress:
+#   - {}   # allow ALL egress`
+    }
+  },
+  {
+    id: 'me6-3', topic: 'services', difficulty: 'fail',
+    title: 'Mock Exam 6 Q14: Create ClusterIP service using shared label selectors, then list all pod IPs sorted',
+    scenario: `On <code>cluster2</code>. Two parts:<br><br>
+<strong>Part I:</strong> Several pods exist in the default namespace. Create a ClusterIP service named <code>radioactive-service</code> exposing pods <code>beta</code> and <code>gamma</code> only. Port <code>8080</code>, targetPort <code>80</code>. Identify the labels that are common to beta and gamma (not shared by others) and use those as selectors.<br><br>
+<strong>Part II:</strong> Store the pod name and IP of <strong>all pods across all namespaces</strong> to <code>/root/pod_ips_ckad02_svcn</code>, sorted by IP. Format:<br><code>POD_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP_ADDR</code>`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/service/',
+      path: 'Concepts → Services, LB & Networking → Service',
+      tip: 'Part I: kubectl get pods --show-labels — find labels UNIQUE to beta+gamma. Then kubectl create service clusterip radioactive-service --tcp=8080:80 --dry-run=client -o yaml > svc.yaml, edit the selector, apply. Part II: kubectl get pods -A -o=custom-columns=\'POD_NAME:metadata.name,IP_ADDR:status.podIP\' --sort-by=.status.podIP'
+    },
+    answer: {
+      explanation: `<span class="highlight">Key insight:</span> Use <code>kubectl get pods --show-labels</code> to spot that only beta and gamma share <code>mode=exam,type=external</code>. Dry-run generates the service YAML — edit the selector before applying. For Part II, <code>custom-columns</code> with <code>--sort-by</code> is the exam-fast approach.`,
+      yaml: `# === Part I ===
+kubectl config use-context cluster2
+
+# Find the discriminating labels for beta + gamma only:
+kubectl get pods --show-labels
+# beta:  env=dev,mode=exam,type=external
+# gamma: env=prod,mode=exam,type=external
+# Common unique labels: mode=exam,type=external
+
+# Confirm only those two pods match:
+kubectl get pods -l mode=exam,type=external
+
+# Generate service YAML:
+kubectl create service clusterip radioactive-service \\
+  --tcp=8080:80 --dry-run=client -o yaml > radioactive-service.yaml
+
+# Edit radioactive-service.yaml — change selector to:
+#   selector:
+#     mode: exam       # replaces default app: radioactive-service
+#     type: external
+
+kubectl apply -f radioactive-service.yaml
+
+# Verify endpoints (should show 2 pod IPs):
+kubectl get ep radioactive-service
+
+# === Part II ===
+kubectl get pods -A \\
+  -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' \\
+  --sort-by=.status.podIP > /root/pod_ips_ckad02_svcn`
+    }
+  },
+  {
+    id: 'me6-4', topic: 'design-build', difficulty: 'fail',
+    title: 'Mock Exam 6 Q19: CRD with openAPIV3Schema validation — string fields, integer min/max, Namespaced scope',
+    scenario: `On <code>cluster2</code>, a CRD file exists at <code>/root/ckad19-crd-aecs.yaml</code>. Add the following validation schema and set scope to <code>Namespaced</code>, then create it:<br><br>
+• <code>destinationName</code>, <code>country</code>, <code>city</code> — type: <code>string</code><br>
+• <code>pricePerNight</code> — type: <code>integer</code>, minimum: <code>50</code>, maximum: <code>5000</code><br>
+• <code>durationInDays</code> — type: <code>integer</code>, minimum: <code>1</code>, maximum: <code>30</code>`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#validation',
+      path: 'Tasks → Extend Kubernetes → CRDs → Validation',
+      tip: 'The schema goes under spec.versions[].schema.openAPIV3Schema. Structure: type: object → properties: spec: → type: object → properties: (your fields). scope: Namespaced goes under spec.scope. Apply with kubectl create -f, NOT apply — create fails loudly if wrong.'
+    },
+    answer: {
+      explanation: `Schema validation nests under <code>spec.versions[].schema.openAPIV3Schema.properties.spec.properties</code>. Each integer field gets <code>minimum</code> and <code>maximum</code>. Don't forget <code>scope: Namespaced</code> under <code>spec</code>.`,
+      yaml: `kubectl config use-context cluster2
+
+# Edit /root/ckad19-crd-aecs.yaml — add under spec.versions[].schema:
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: holidaydestinations.destinations.k8s.io
+spec:
+  group: destinations.k8s.io
+  scope: Namespaced          # <-- set this
+  names:
+    kind: HolidayDestination
+    singular: holidaydestination
+    plural: holidaydestinations
+    shortNames: [hd]
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              destinationName:
+                type: string
+              country:
+                type: string
+              city:
+                type: string
+              pricePerNight:
+                type: integer
+                minimum: 50
+                maximum: 5000
+              durationInDays:
+                type: integer
+                minimum: 1
+                maximum: 30
+
+kubectl create -f /root/ckad19-crd-aecs.yaml`
+    }
+  },
+  {
+    id: 'me6-5', topic: 'observability', difficulty: 'fail',
+    title: 'Mock Exam 6 Q21: Get logs from a named sidecar container and redirect to a file',
+    scenario: `On <code>cluster1</code>, a pod named <code>log-generator-pod</code> runs in the default namespace. It has two containers. Get the logs of the <code>sidecar</code> container and save them to <code>/root/ckad21-exam.txt</code> on the student node.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/',
+      path: 'Reference → kubectl → kubectl logs',
+      tip: 'Use kubectl logs <pod> -c <container-name> to target a specific container. Redirect with > to write to a file. If unsure of container names: kubectl get pod log-generator-pod -o jsonpath=\'{.spec.containers[*].name}\''
+    },
+    answer: {
+      explanation: `When a pod has multiple containers, <code>kubectl logs</code> requires <code>-c &lt;container&gt;</code> to target the right one. Redirect output with <code>&gt;</code> to store it.`,
+      yaml: `kubectl config use-context cluster1
+
+# Find container names (if you forget):
+kubectl get pod log-generator-pod -o jsonpath='{.spec.containers[*].name}'
+# Output: ckad-exam sidecar
+
+# Get sidecar logs and save to file:
+kubectl logs log-generator-pod -c sidecar > /root/ckad21-exam.txt
+
+# Verify:
+cat /root/ckad21-exam.txt`
+    }
+  },
+
   {
     id: 'me5-5', topic: 'observability', difficulty: 'hard',
     title: 'Debug pod stuck in Init:StartError — fix missing shell interpreter in init container command',
