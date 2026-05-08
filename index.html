@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CKAD Practice — Matt's Dojo</title>
+<title>K8s Practice</title>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
   :root {
     --bg: #0f1117;
@@ -133,6 +134,20 @@
   .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 20px; padding: 5px 13px; font-size: 12px; cursor: pointer; transition: all .15s; }
   .filter-btn:hover { border-color: var(--accent); color: var(--text); }
   .filter-btn.active { background: rgba(50,108,229,.2); border-color: var(--accent); color: var(--accent2); }
+
+  /* Phosphor icons, nified styling so they replace the rainbow of emojis */
+  .ph { vertical-align: -0.12em; line-height: 1; flex-shrink: 0; }
+  .topic-btn .ph { font-size: 16px; color: inherit; }
+  .topic-header h2 .ph { font-size: 22px; color: var(--accent2); margin-right: 6px; vertical-align: -0.18em; }
+  .overview-card h3 .ph { font-size: 18px; color: var(--accent2); margin-right: 6px; vertical-align: -0.18em; }
+  .docs-nav h3 .ph { font-size: 14px; margin-right: 4px; }
+  .docs-item .ph { font-size: 12px; vertical-align: -0.1em; }
+  .hint-btn .ph, .answer-btn .ph, .mark-known .ph, .mark-review .ph { font-size: 14px; margin-right: 2px; }
+  .alert-box .ph { font-size: 14px; margin-right: 4px; vertical-align: -0.18em; }
+  .section-header .ph { font-size: 16px; margin-right: 6px; vertical-align: -0.18em; }
+  .chevron.ph { font-size: 14px; }
+  .empty-state .ph { font-size: 40px; color: var(--green); }
+  .mark-status .ph { font-size: 12px; margin-right: 3px; }
 </style>
 </head>
 <body>
@@ -140,8 +155,7 @@
   <!-- Top bar -->
   <div class="topbar">
     <span class="k8s-logo">⎈</span>
-    <h1>CKAD Practice Dojo</h1>
-    <div style="font-size:12px;color:var(--muted);margin-left:8px">Matt's exam is Friday 5 PM</div>
+    <h1>K8s Practice</h1>
     <div class="score-badge">Known: <span id="known-count">0</span> / <span id="total-count">0</span></div>
   </div>
 
@@ -149,7 +163,7 @@
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-section">Navigation</div>
     <button class="topic-btn active" onclick="showTopic('home')" id="nav-home">
-      <span>🏠</span> Overview
+      <i class="ph ph-house"></i> Overview
     </button>
     <div class="sidebar-section" style="margin-top:8px">CKAD Topics</div>
     <!-- dynamically filled -->
@@ -169,10 +183,10 @@ const TOPICS = [
   {
     id: 'network-policy',
     label: 'Network Policies',
-    icon: '🔒',
+    icon: 'shield-check',
     docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
     docsPath: 'Concepts → Services, LB & Networking → Network Policies',
-    searchTip: 'Search "network policy" — look for the podSelector + ingress/egress spec example',
+    searchTip: 'Search "network policy", look for the podSelector + ingress/egress spec example',
     subtitle: 'You deleted a NetPol instead of adding an allow rule. Never again.',
     docLinks: [
       { label: 'NetworkPolicy concept', url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/', tip: 'Search: networkpolicy podSelector' },
@@ -182,10 +196,10 @@ const TOPICS = [
   {
     id: 'ingress',
     label: 'Ingress',
-    icon: '🌐',
+    icon: 'globe',
     docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/ingress/',
     docsPath: 'Concepts → Services, LB & Networking → Ingress',
-    searchTip: 'Search "ingress" — the spec.rules[].http.paths[].backend.service.port section',
+    searchTip: 'Search "ingress", the spec.rules[].http.paths[].backend.service.port section',
     subtitle: 'You used the NodePort (30093) instead of the Service ClusterIP port (8080).',
     docLinks: [
       { label: 'Ingress concept', url: 'https://kubernetes.io/docs/concepts/services-networking/ingress/', tip: 'Find: spec.rules, backend.service.port' },
@@ -196,11 +210,11 @@ const TOPICS = [
   {
     id: 'cronjob',
     label: 'CronJobs & Jobs',
-    icon: '⏱',
+    icon: 'clock-countdown',
     docsUrl: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/',
     docsPath: 'Concepts → Workloads → Workload Management → CronJob',
-    searchTip: 'Search "cronjob" — find jobTemplate.spec section for activeDeadlineSeconds',
-    subtitle: 'activeDeadlineSeconds and backoffLimit go under jobTemplate.spec — NOT spec.',
+    searchTip: 'Search "cronjob", find jobTemplate.spec section for activeDeadlineSeconds',
+    subtitle: 'activeDeadlineSeconds and backoffLimit go under jobTemplate.spec, OT spec.',
     docLinks: [
       { label: 'CronJob', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/', tip: 'Look for jobTemplate.spec' },
       { label: 'Job', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/job/', tip: 'backoffLimit, activeDeadlineSeconds' },
@@ -210,10 +224,10 @@ const TOPICS = [
   {
     id: 'observability',
     label: 'Observability',
-    icon: '👁',
+    icon: 'eye',
     docsUrl: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/',
     docsPath: 'Tasks → Configure Pods → Configure Liveness, Readiness, Startup Probes',
-    searchTip: 'Search "liveness probe" — note the 3 types: exec, httpGet, tcpSocket',
+    searchTip: 'Search "liveness probe", note the 3 types: exec, httpGet, tcpSocket',
     subtitle: 'Lowest scoring CKAD domain. Probe types, kubectl top, log redirection.',
     docLinks: [
       { label: 'Liveness/Readiness probes', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/', tip: 'All 3 probe types here' },
@@ -225,10 +239,10 @@ const TOPICS = [
   {
     id: 'design-build',
     label: 'App Design & Build',
-    icon: '🏗',
+    icon: 'blueprint',
     docsUrl: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/',
     docsPath: 'Concepts → Workloads → Pods → Init Containers',
-    searchTip: 'Search "sidecar" or "init container" — look at spec.initContainers',
+    searchTip: 'Search "sidecar" or "init container", look at spec.initContainers',
     subtitle: 'Multi-container patterns, init containers, sidecars, CRDs, Security Contexts.',
     docLinks: [
       { label: 'Init containers', url: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/', tip: 'spec.initContainers' },
@@ -242,10 +256,10 @@ const TOPICS = [
   {
     id: 'services',
     label: 'Services & Networking',
-    icon: '🔌',
+    icon: 'plugs-connected',
     docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/service/',
     docsPath: 'Concepts → Services, LB & Networking → Service',
-    searchTip: 'Search "service" — find spec.selector and spec.ports. For ClusterIP: kubectl create service clusterip.',
+    searchTip: 'Search "service", find spec.selector and spec.ports. For ClusterIP: kubectl create service clusterip.',
     subtitle: 'ClusterIP creation with label selectors, pod IP listing with custom-columns.',
     docLinks: [
       { label: 'Service concept', url: 'https://kubernetes.io/docs/concepts/services-networking/service/', tip: 'spec.selector, spec.ports, ClusterIP type' },
@@ -256,16 +270,152 @@ const TOPICS = [
   {
     id: 'deployment',
     label: 'App Deployment',
-    icon: '🚀',
+    icon: 'rocket-launch',
     docsUrl: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/',
     docsPath: 'Concepts → Workloads → Workload Management → Deployments',
-    searchTip: 'Search "rollingupdate" — strategy.rollingUpdate.maxSurge/maxUnavailable',
+    searchTip: 'Search "rollingupdate", trategy.rollingUpdate.maxSurge/maxUnavailable',
     subtitle: 'RollingUpdate, blue/green, Helm, kubectl rollout.',
     docLinks: [
       { label: 'Deployment', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/', tip: 'rollingUpdate strategy, rollback' },
       { label: 'kubectl rollout', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/', tip: 'undo, history, status' },
       { label: 'Helm quickstart', url: 'https://helm.sh/docs/intro/quickstart/', tip: 'helm install, lint, ls' },
       { label: 'RBAC', url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/', tip: 'Role, ClusterRole, non-resource URLs' },
+    ]
+  },
+
+  // ────────────────────── CKA TOPICS ──────────────────────
+  {
+    id: 'cka-etcd',
+    cert: 'cka',
+    label: 'etcd Backup & Restore',
+    icon: 'database',
+    docsUrl: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/',
+    docsPath: 'Tasks → Administer a Cluster → Operating etcd',
+    searchTip: 'Search "backup etcd", find the snapshot save command (the one with --cacert/--cert/--key)',
+    subtitle: 'LL1 Q6: "Never figured this one out". Memorize the etcdctl snapshot one-liner.',
+    docLinks: [
+      { label: 'Backup an etcd cluster', url: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster', tip: 'Search: backup etcd cluster' },
+      { label: 'Restore an etcd cluster', url: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster', tip: 'Search: restore etcd snapshot' },
+      { label: 'etcdctl snapshot', url: 'https://etcd.io/docs/v3.5/op-guide/recovery/', tip: 'snapshot save / status / restore' },
+    ]
+  },
+  {
+    id: 'cka-jsonpath',
+    cert: 'cka',
+    label: 'JSONPath & Custom Columns',
+    icon: 'magnifying-glass',
+    docsUrl: 'https://kubernetes.io/docs/reference/kubectl/jsonpath/',
+    docsPath: 'Reference → kubectl → JSONPath Support',
+    searchTip: 'Search "jsonpath", try the cheat sheet too. custom-columns lives in kubectl_get reference.',
+    subtitle: 'LL1 Q2: didn\'t attempt, ouldn\'t figure out the syntax. Drill the patterns.',
+    docLinks: [
+      { label: 'JSONPath Support', url: 'https://kubernetes.io/docs/reference/kubectl/jsonpath/', tip: 'Range, index, filter, escape syntax' },
+      { label: 'kubectl Cheat Sheet', url: 'https://kubernetes.io/docs/reference/kubectl/quick-reference/', tip: 'Search: custom-columns, has copy-paste examples' },
+      { label: 'kubectl get reference', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/', tip: '-o custom-columns / --sort-by' },
+    ]
+  },
+  {
+    id: 'cka-upgrade',
+    cert: 'cka',
+    label: 'kubeadm Cluster Upgrades',
+    icon: 'arrow-fat-line-up',
+    docsUrl: 'https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/',
+    docsPath: 'Tasks → Administer a Cluster → kubeadm → Upgrading kubeadm clusters',
+    searchTip: 'Search "kubeadm upgrade", the docs site for the EXACT minor version (v1-X) has the apt sources URL you need.',
+    subtitle: 'LL1 Q1: passed but a lot to memorize. Drill the apt + drain + uncordon sequence.',
+    docLinks: [
+      { label: 'Upgrade kubeadm clusters', url: 'https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/', tip: 'Use the version-pinned URL: v1-XX.docs.kubernetes.io' },
+      { label: 'Safely Drain a Node', url: 'https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/', tip: 'kubectl drain --ignore-daemonsets' },
+      { label: 'kubectl drain', url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_drain/', tip: '--ignore-daemonsets, --delete-emptydir-data' },
+    ]
+  },
+  {
+    id: 'cka-static-pod',
+    cert: 'cka',
+    label: 'Static Pods',
+    icon: 'push-pin',
+    docsUrl: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/',
+    docsPath: 'Tasks → Configure Pods and Containers → Create static Pods',
+    searchTip: 'Search "static pod", find the staticPodPath kubelet config and /etc/kubernetes/manifests pattern.',
+    subtitle: 'Mock 2 Q7: SSH to a node, drop a pod manifest in the staticPodPath dir.',
+    docLinks: [
+      { label: 'Create Static Pods', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/', tip: 'staticPodPath in kubelet config' },
+      { label: 'kubelet config reference', url: 'https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/', tip: '/var/lib/kubelet/config.yaml' },
+    ]
+  },
+  {
+    id: 'cka-csr-rbac',
+    cert: 'cka',
+    label: 'CSR & RBAC Users',
+    icon: 'key',
+    docsUrl: 'https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/',
+    docsPath: 'Reference → Access, Authn, Authz → Certificate Signing Requests',
+    searchTip: 'Search "certificate signing request", find the YAML with signerName + base64 request + usages.',
+    subtitle: 'Mock 2 Q5: create CSR, approve it, then bind a Role to the new user.',
+    docLinks: [
+      { label: 'CertificateSigningRequest', url: 'https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/', tip: 'signerName: kubernetes.io/kube-apiserver-client' },
+      { label: 'Normal user CSR walkthrough', url: 'https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/', tip: 'base64 -w 0 the .csr file for the request field' },
+      { label: 'RBAC Authorization', url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/', tip: 'kubectl create role / rolebinding' },
+    ]
+  },
+  {
+    id: 'cka-dns',
+    cert: 'cka',
+    label: 'DNS & Service Discovery',
+    icon: 'address-book',
+    docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/',
+    docsPath: 'Concepts → Services, LB & Networking → DNS for Services and Pods',
+    searchTip: 'Search "dns for services", find the FQDN format: <svc>.<ns>.svc.cluster.local and the pod-IP form (a-b-c-d.<ns>.pod).',
+    subtitle: 'Mock 2 Q6: nslookup a Service and a Pod from inside the cluster using busybox:1.28.',
+    docLinks: [
+      { label: 'DNS for Services and Pods', url: 'https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/', tip: 'Service FQDN + pod hostname format' },
+      { label: 'Debugging DNS Resolution', url: 'https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/', tip: 'busybox:1.28 (newer images break nslookup)' },
+    ]
+  },
+  {
+    id: 'cka-cni',
+    cert: 'cka',
+    label: 'CNI Networking',
+    icon: 'tree-structure',
+    docsUrl: 'https://kubernetes.io/docs/concepts/cluster-administration/addons/',
+    docsPath: 'Concepts → Cluster Administration → Networking & Network Policy add-ons',
+    searchTip: 'Use the projectcalico.org docs (linked from the addons page). Search "Install Calico operator", find tigera-operator.yaml + custom-resources.yaml.',
+    subtitle: 'Mock 2 Q14: install Calico operator + customize the IP pool CIDR.',
+    docLinks: [
+      { label: 'Calico quickstart (operator)', url: 'https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart', tip: 'tigera-operator.yaml + custom-resources.yaml' },
+      { label: 'K8s networking add-ons', url: 'https://kubernetes.io/docs/concepts/cluster-administration/addons/', tip: 'Calico, Cilium, Flannel links' },
+      { label: 'Network plugin requirements', url: 'https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/', tip: 'CNI conf at /etc/cni/net.d' },
+    ]
+  },
+  {
+    id: 'cka-gateway',
+    cert: 'cka',
+    label: 'Gateway API',
+    icon: 'door',
+    docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/gateway/',
+    docsPath: 'Concepts → Services, LB & Networking → Gateway API',
+    searchTip: 'Use the gateway-api.sigs.k8s.io docs for full spec, earch "Gateway listeners". For TLS: search "TLS termination".',
+    subtitle: 'Mock 1 Q11 / Mock 2 Q10: Create a Gateway with HTTP and HTTPS+TLS listeners.',
+    docLinks: [
+      { label: 'Gateway API concept', url: 'https://kubernetes.io/docs/concepts/services-networking/gateway/', tip: 'Gateway, GatewayClass, HTTPRoute' },
+      { label: 'gateway-api.sigs.k8s.io', url: 'https://gateway-api.sigs.k8s.io/', tip: 'Spec reference with copy-paste YAML' },
+      { label: 'TLS termination', url: 'https://gateway-api.sigs.k8s.io/guides/tls/', tip: 'listeners[].tls.certificateRefs' },
+    ]
+  },
+  {
+    id: 'cka-troubleshoot',
+    cert: 'cka',
+    label: 'Cluster Troubleshooting',
+    icon: 'wrench',
+    docsUrl: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/',
+    docsPath: 'Tasks → Monitoring, Logging, and Debugging → Troubleshooting Clusters',
+    searchTip: 'Most fixes are config-file edits in /etc/kubernetes/. Check kubelet/etcd/apiserver logs via journalctl + crictl.',
+    subtitle: 'kubeconfig fixes, ResourceQuota blocks, broken kubectl, PV/PVC mismatches.',
+    docLinks: [
+      { label: 'Troubleshoot Clusters', url: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/', tip: 'journalctl -u kubelet, crictl ps' },
+      { label: 'Troubleshoot kubeadm', url: 'https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/', tip: 'kubelet & control plane recovery' },
+      { label: 'kubeconfig', url: 'https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/', tip: 'clusters/users/contexts trio' },
+      { label: 'Resource Quotas', url: 'https://kubernetes.io/docs/concepts/policy/resource-quotas/', tip: 'requests/limits per quota' },
     ]
   },
 ];
@@ -283,7 +433,7 @@ const QUESTIONS = [
       tip: 'Find the "podSelector" + "ingress.from.podSelector" example. The key is spec.podSelector (who this applies to) vs ingress.from.podSelector (who is allowed in).'
     },
     answer: {
-      explanation: `The existing default-deny blocks everything. You need to <span class="highlight">add</span> a new allow policy — never delete the deny. The podSelector targets secure-pod. The ingress.from.podSelector allows webapp-color.`,
+      explanation: `The existing default-deny blocks everything. You need to <span class="highlight">add</span> a new allow policy, ever delete the deny. The podSelector targets secure-pod. The ingress.from.podSelector allows webapp-color.`,
       yaml: `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -327,7 +477,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          tier: server         # existing rule — do not remove
+          tier: server         # existing rule, do not remove
     - podSelector:             # ADD THIS (OR condition)
         matchLabels:
           access: allowed`
@@ -343,7 +493,7 @@ spec:
       tip: 'podSelector on the policy = which pods are protected (app: redis). ingress.from.podSelector = who can reach them (access: redis). policyTypes must include Ingress.'
     },
     answer: {
-      explanation: `The policy's podSelector must match the Redis pods (app: redis, NOT role: redis — check the actual pod labels). The ingress from rule uses access: redis.`,
+      explanation: `The policy's podSelector must match the Redis pods (app: redis, NOT role: redis, check the actual pod labels). The ingress from rule uses access: redis.`,
       yaml: `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -394,7 +544,7 @@ spec:
     ports:
     - protocol: TCP
       port: 5432
-  - ports:               # Allow DNS — ALWAYS include this!
+  - ports:               # Allow DNS, LWAYS include this!
     - protocol: UDP
       port: 53
     - protocol: TCP
@@ -413,7 +563,7 @@ spec:
       tip: 'Find the "Name based virtual hosting" example. The key mistake: backend.service.port.number is the SERVICE port (8080), NOT the IngressController NodePort (30093). Run "kubectl get svc" to see the right number.'
     },
     answer: {
-      explanation: `<span class="highlight">The critical mistake you made:</span> You used port 30093 in the backend. That's the NodePort on the IngressController's Service — it's external-facing. The backend port must be the Service's internal ClusterIP port.`,
+      explanation: `<span class="highlight">The critical mistake you made:</span> You used port 30093 in the backend. That's the NodePort on the IngressController's Service, t's external-facing. The backend port must be the Service's internal ClusterIP port.`,
       yaml: `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -505,7 +655,7 @@ kubectl get -n ingress-nginx deploy ingress-nginx-controller -o yaml > ing-ctrl.
 # 2. Delete it
 kubectl delete -n ingress-nginx deploy ingress-nginx-controller
 
-# 3. Edit ing-ctrl.yaml — find the args section:
+# 3. Edit ing-ctrl.yaml, find the args section:
 #    Change:
 #      - --default-backend-service=default/default-backend-service
 #    To:
@@ -528,10 +678,10 @@ kubectl edit ingress <name> -n green-space
     hint: {
       url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cronjob-spec',
       path: 'Concepts → CronJob → CronJob spec',
-      tip: 'In the docs, look for the "jobTemplate.spec" section. backoffLimit and activeDeadlineSeconds are Job fields — they live under jobTemplate.spec, NOT the top-level CronJob spec. This is the exact mistake that failed your LL2 Q2.'
+      tip: 'In the docs, look for the "jobTemplate.spec" section. backoffLimit and activeDeadlineSeconds are Job fields, they live under jobTemplate.spec, NOT the top-level CronJob spec. This is the exact mistake that failed your LL2 Q2.'
     },
     answer: {
-      explanation: `<span class="highlight">The nesting trap:</span> CronJob.spec has schedule + jobTemplate. Job fields (backoffLimit, activeDeadlineSeconds) live inside jobTemplate.spec — one level deeper than you might expect.`,
+      explanation: `<span class="highlight">The nesting trap:</span> CronJob.spec has schedule + jobTemplate. Job fields (backoffLimit, activeDeadlineSeconds) live inside jobTemplate.spec, one level deeper than you might expect.`,
       yaml: `apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -599,10 +749,10 @@ spec:
     hint: {
       url: 'https://kubernetes.io/docs/concepts/workloads/controllers/job/',
       path: 'Concepts → Workload Management → Job',
-      tip: 'In the Job spec (not CronJob), backoffLimit and activeDeadlineSeconds sit directly under spec — they are Job fields. Look for the "Writing a Job spec" section in the docs.'
+      tip: 'In the Job spec (not CronJob), backoffLimit and activeDeadlineSeconds sit directly under spec, they are Job fields. Look for the "Writing a Job spec" section in the docs.'
     },
     answer: {
-      explanation: `In a standalone Job, backoffLimit and activeDeadlineSeconds are at <code>spec</code> level — no jobTemplate wrapper needed (that wrapper is only for CronJobs).`,
+      explanation: `In a standalone Job, backoffLimit and activeDeadlineSeconds are at <code>spec</code> level, no jobTemplate wrapper needed (that wrapper is only for CronJobs).`,
       yaml: `apiVersion: batch/v1
 kind: Job
 metadata:
@@ -629,14 +779,14 @@ spec:
   {
     id: 'obs-1', topic: 'observability', difficulty: 'fail',
     title: 'Fix pod not ready: wrong probe type (httpGet with exec-style config)',
-    scenario: `A pod template <code>goproxy.yaml</code> fails to apply with: <code>unknown field "command" in HTTPGetAction</code>. The liveness probe is typed as <code>httpGet</code> but configured with exec-style <code>command</code> fields. Fix the probe type. Then the pod restarts because <code>initialDelaySeconds: 1</code> is too short — the healthcheck file isn't created for 3 seconds. Fix that too.`,
+    scenario: `A pod template <code>goproxy.yaml</code> fails to apply with: <code>unknown field "command" in HTTPGetAction</code>. The liveness probe is typed as <code>httpGet</code> but configured with exec-style <code>command</code> fields. Fix the probe type. Then the pod restarts because <code>initialDelaySeconds: 1</code> is too short, the healthcheck file isn't created for 3 seconds. Fix that too.`,
     hint: {
       url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command',
       path: 'Tasks → Configure Pods → Liveness, Readiness, Startup Probes → Define a liveness command',
       tip: 'There are 3 probe types: httpGet (needs path+port), exec (needs command list), tcpSocket (needs port). They cannot be mixed. Change httpGet to exec. Then increase initialDelaySeconds so it fires after the healthcheck file exists.'
     },
     answer: {
-      explanation: `Two bugs: (1) probe type mismatch — changed <code>httpGet</code> to <code>exec</code>. (2) initialDelaySeconds too short — increased from 1 to 5.`,
+      explanation: `Two bugs: (1) probe type mismatch, changed <code>httpGet</code> to <code>exec</code>. (2) initialDelaySeconds too short, increased from 1 to 5.`,
       yaml: `# BEFORE (broken):
 livenessProbe:
   httpGet:         # wrong type!
@@ -650,7 +800,7 @@ livenessProbe:
     command:
     - cat
     - /healthcheck
-  initialDelaySeconds: 5   # was 1 — healthcheck file created after 3s
+  initialDelaySeconds: 5   # was 1, ealthcheck file created after 3s
   periodSeconds: 10`
     }
   },
@@ -709,7 +859,7 @@ kubectl replace -f analytics-app.yaml --force`
   {
     id: 'obs-4', topic: 'observability', difficulty: 'easy',
     title: 'Find pod with highest memory usage using kubectl top, then get its memory limit',
-    scenario: `Three pods <code>hulk</code>, <code>thor</code>, and <code>ironman</code> are running on <code>cluster1</code>. Identify which has highest memory usage. Then get the memory limit configured for that pod and write <code>PodName,MemoryLimit</code> to <code>/root/pod-metrics</code>.`,
+    scenario: `Three pods <code>hulk</code>, <code>thor</code>, and <code>ironman</code> are running on <code>cluster1</code>. Identify which has highest memory usage. Then get the memory limit configured for that pod and write <code>PodName, emoryLimit</code> to <code>/root/pod-metrics</code>.`,
     hint: {
       url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_top/',
       path: 'Reference → kubectl → kubectl top',
@@ -796,10 +946,10 @@ spec:
     hint: {
       url: 'https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/',
       path: 'Tasks → Inject Data → Define an environment variable',
-      tip: 'For alpine to stay running, it needs a sleep command. env vars use the spec.containers[].env list with name/value pairs. Both containers go under spec.containers — no special field needed.'
+      tip: 'For alpine to stay running, it needs a sleep command. env vars use the spec.containers[].env list with name/value pairs. Both containers go under spec.containers, no special field needed.'
     },
     answer: {
-      explanation: `Alpine has no long-running process by default — add <code>command: ["/bin/sh", "-c", "sleep 3600"]</code> or it exits immediately.`,
+      explanation: `Alpine has no long-running process by default, add <code>command: ["/bin/sh", "-c", "sleep 3600"]</code> or it exits immediately.`,
       yaml: `apiVersion: v1
 kind: Pod
 metadata:
@@ -831,7 +981,7 @@ spec:
       tip: 'Use env.valueFrom.configMapKeyRef to pull a single key from a ConfigMap. The command list format is important: use ["/bin/sh", "-c", "command string"] for shell commands. emptyDir goes in volumes, not referenced by storageClassName.'
     },
     answer: {
-      explanation: `The command redirects to a file — it must be in shell form (<code>/bin/sh -c</code>). The env is sourced from the ConfigMap via <code>configMapKeyRef</code>.`,
+      explanation: `The command redirects to a file, it must be in shell form (<code>/bin/sh -c</code>). The env is sourced from the ConfigMap via <code>configMapKeyRef</code>.`,
       yaml: `---
 apiVersion: v1
 kind: ConfigMap
@@ -923,7 +1073,7 @@ spec:
     hint: {
       url: 'https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container',
       path: 'Tasks → Configure Pods → Security Context → Set capabilities',
-      tip: 'securityContext goes under spec.containers[]. capabilities.add takes a list of strings. When recreating the pod, do NOT copy the auto-generated volumeMounts for service account tokens — those will fail.'
+      tip: 'securityContext goes under spec.containers[]. capabilities.add takes a list of strings. When recreating the pod, do NOT copy the auto-generated volumeMounts for service account tokens, those will fail.'
     },
     answer: {
       explanation: `<span class="highlight">Gotcha from your notes:</span> When you exported and re-applied the pod YAML, it included a volumeMount for a kube-api-access token. That volume doesn't exist in the new pod spec and caused an error. Strip auto-generated fields when recreating pods.`,
@@ -991,7 +1141,7 @@ kubectl rollout undo deployment/nginx-deploy`
       tip: 'The service selects on the SHARED label (version: v1), not deployment-specific labels. Traffic splits proportionally to pod count. 70/30 = 7 blue replicas, 3 green replicas.'
     },
     answer: {
-      explanation: `The shared label <code>version: v1</code> is the key. The service sees all 10 pods and routes randomly — replica count controls the percentage.`,
+      explanation: `The shared label <code>version: v1</code> is the key. The service sees all 10 pods and routes randomly, eplica count controls the percentage.`,
       yaml: `# blue-apd: 7 replicas = 70%
 spec:
   replicas: 7
@@ -1003,7 +1153,7 @@ spec:
     metadata:
       labels:
         type-one: blue
-        version: v1         # shared label — service selects this
+        version: v1         # shared label, ervice selects this
     spec:
       containers:
       - image: kodekloud/webapp-color:v1
@@ -1047,7 +1197,7 @@ spec:
   --replicas=2 \\
   -n alpha-ns-apd
 
-# Verify: 2/(5+2) = 28.5% — well below 40%`
+# Verify: 2/(5+2) = 28.5%, well below 40%`
     }
   },
   {
@@ -1102,7 +1252,7 @@ helm ls -n frontend-apd`
     hint: {
       url: 'https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/',
       path: 'Concepts → Workload Management → CronJob',
-      tip: '"Every hour at minute 0" = "0 * * * *" (first field is minutes). restartPolicy: OnFailure means the container will restart on non-zero exit — use this when you want automatic retry but not Always (which is invalid in Jobs).'
+      tip: '"Every hour at minute 0" = "0 * * * *" (first field is minutes). restartPolicy: OnFailure means the container will restart on non-zero exit, use this when you want automatic retry but not Always (which is invalid in Jobs).'
     },
     answer: {
       explanation: `<span class="highlight">restartPolicy choices in Jobs/CronJobs:</span> <code>Never</code> = don't restart, just mark failed. <code>OnFailure</code> = restart the container in-place if it exits non-zero. <code>Always</code> is NOT valid in Job/CronJob pods.`,
@@ -1125,7 +1275,7 @@ spec:
             - /bin/sh
             - -c
             - echo I will pass CKAD certification
-          restartPolicy: OnFailure  # NOT Always — that's invalid in Jobs`
+          restartPolicy: OnFailure  # NOT Always, hat's invalid in Jobs`
     }
   },
   {
@@ -1135,7 +1285,7 @@ spec:
     hint: {
       url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_image/',
       path: 'Reference → kubectl → kubectl set image',
-      tip: 'First use "kubectl describe deploy" to find the exact container name — you need it for set image. Syntax: kubectl set image deploy/<name> <container-name>=<image>. Then SSH to the node and use echo + redirect to write the file. Create the directory first if it doesn\'t exist.'
+      tip: 'First use "kubectl describe deploy" to find the exact container name, you need it for set image. Syntax: kubectl set image deploy/<name> <container-name>=<image>. Then SSH to the node and use echo + redirect to write the file. Create the directory first if it doesn\'t exist.'
     },
     answer: {
       explanation: `Three distinct steps: update image, write record to file (requires SSH), scale. Finding the container name from describe is the step people miss.`,
@@ -1167,10 +1317,10 @@ kubectl get deployments,pods -n dashboard-apd`
     hint: {
       url: 'https://helm.sh/docs/helm/helm_upgrade/',
       path: 'helm.sh → Helm Commands → helm upgrade',
-      tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata — without it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
+      tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata, ithout it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
     },
     answer: {
-      explanation: `<span class="highlight">helm repo update is mandatory</span> before upgrading to a new version — it syncs the local index with the remote repo. Without it, Helm won't know the new version exists.`,
+      explanation: `<span class="highlight">helm repo update is mandatory</span> before upgrading to a new version, it syncs the local index with the remote repo. Without it, Helm won't know the new version exists.`,
       yaml: `# SSH to the controlplane first
 ssh cluster3-controlplane
 
@@ -1191,14 +1341,14 @@ kubectl get pods -n crystal-apd-ns`
   {
     id: 'me5-4', topic: 'deployment', difficulty: 'medium',
     title: 'RBAC: Role restricted to a specific named ConfigMap instance',
-    scenario: `Create a Role named <code>configmap-updater</code> in namespace <code>ckad21-auth2-aecs</code>. It should grant <code>update</code> and <code>get</code> permissions on <code>configmaps</code>, but ONLY for the specific ConfigMap named <code>ckad-cnfmp-aecs</code> — not all ConfigMaps.`,
+    scenario: `Create a Role named <code>configmap-updater</code> in namespace <code>ckad21-auth2-aecs</code>. It should grant <code>update</code> and <code>get</code> permissions on <code>configmaps</code>, but ONLY for the specific ConfigMap named <code>ckad-cnfmp-aecs</code>, not all ConfigMaps.`,
     hint: {
       url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources',
       path: 'Reference → RBAC Authorization → Referring to resources',
       tip: 'kubectl create role supports --resource-name to restrict a rule to a specific named instance of a resource. Without it, the role grants access to ALL configmaps. In YAML this maps to the "resourceNames" field in the rules list.'
     },
     answer: {
-      explanation: `<span class="highlight">resourceNames</span> is the key field — it scopes the permission to a specific named resource instance. Without it, the role applies to all configmaps in the namespace.`,
+      explanation: `<span class="highlight">resourceNames</span> is the key field, it scopes the permission to a specific named resource instance. Without it, the role applies to all configmaps in the namespace.`,
       yaml: `# Imperative (one-liner):
 kubectl create role configmap-updater \\
   --namespace=ckad21-auth2-aecs \\
@@ -1262,22 +1412,22 @@ spec:
   },
   {
     id: 'me6-2', topic: 'network-policy', difficulty: 'fail',
-    title: 'Mock Exam 6 Q12: Troubleshoot — fix service selector mismatch AND overly restrictive egress NetworkPolicy',
+    title: 'Mock Exam 6 Q12: Troubleshoot, fix service selector mismatch AND overly restrictive egress NetworkPolicy',
     scenario: `In namespace <code>ns-new-ckad</code> on <code>cluster3</code>, two issues exist:<br><br>
 <strong>Issue 1:</strong> <code>backend-ckad-svcn</code> cannot reach backend pods. Inspect and fix the service selector.<br>
-<strong>Issue 2:</strong> <code>frontend-ckad-svcn</code> is not accessible from backend pods. A NetworkPolicy <code>backend-egress-restricted</code> is blocking traffic — fix it so backends can reach all egress destinations (not just frontend).`,
+<strong>Issue 2:</strong> <code>frontend-ckad-svcn</code> is not accessible from backend pods. A NetworkPolicy <code>backend-egress-restricted</code> is blocking traffic, fix it so backends can reach all egress destinations (not just frontend).`,
     hint: {
       url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/#egress',
       path: 'Concepts → Network Policies → Egress',
-      tip: 'For Issue 1: kubectl describe svc backend-ckad-svcn — compare selector labels to actual pod labels (kubectl get pods --show-labels). For Issue 2: kubectl edit netpol backend-egress-restricted — replace the restrictive "to:" egress rule with an empty {} to allow all egress.'
+      tip: 'For Issue 1: kubectl describe svc backend-ckad-svcn, ompare selector labels to actual pod labels (kubectl get pods --show-labels). For Issue 2: kubectl edit netpol backend-egress-restricted, eplace the restrictive "to:" egress rule with an empty {} to allow all egress.'
     },
     answer: {
       explanation: `<span class="highlight">Issue 1:</span> Service selector used <code>app: back-end, tier: ckadexam</code> but pods have <code>app: backend, tier: ckad-exam</code>. Fix with kubectl edit svc. <span class="highlight">Issue 2:</span> Replace the to: podSelector egress rule with an empty <code>- {}</code> to allow all egress.`,
       yaml: `# === Issue 1: Fix service selector ===
 kubectl -n ns-new-ckad describe svc backend-ckad-svcn
-# Selector shows: app=back-end,tier=ckadexam  ← WRONG
+# Selector shows: app=back-end, ier=ckadexam  ← WRONG
 kubectl -n ns-new-ckad get pods --show-labels
-# Pods have: app=backend,tier=ckad-exam
+# Pods have: app=backend, ier=ckad-exam
 
 kubectl -n ns-new-ckad edit svc backend-ckad-svcn
 # Change selector to:
@@ -1311,27 +1461,27 @@ kubectl -n ns-new-ckad edit netpol backend-egress-restricted
     hint: {
       url: 'https://kubernetes.io/docs/concepts/services-networking/service/',
       path: 'Concepts → Services, LB & Networking → Service',
-      tip: 'Part I: kubectl get pods --show-labels — find labels UNIQUE to beta+gamma. Then kubectl create service clusterip radioactive-service --tcp=8080:80 --dry-run=client -o yaml > svc.yaml, edit the selector, apply. Part II: kubectl get pods -A -o=custom-columns=\'POD_NAME:metadata.name,IP_ADDR:status.podIP\' --sort-by=.status.podIP'
+      tip: 'Part I: kubectl get pods --show-labels, find labels UNIQUE to beta+gamma. Then kubectl create service clusterip radioactive-service --tcp=8080:80 --dry-run=client -o yaml > svc.yaml, edit the selector, apply. Part II: kubectl get pods -A -o=custom-columns=\'POD_NAME:metadata.name, P_ADDR:status.podIP\' --sort-by=.status.podIP'
     },
     answer: {
-      explanation: `<span class="highlight">Key insight:</span> Use <code>kubectl get pods --show-labels</code> to spot that only beta and gamma share <code>mode=exam,type=external</code>. Dry-run generates the service YAML — edit the selector before applying. For Part II, <code>custom-columns</code> with <code>--sort-by</code> is the exam-fast approach.`,
+      explanation: `<span class="highlight">Key insight:</span> Use <code>kubectl get pods --show-labels</code> to spot that only beta and gamma share <code>mode=exam, type=external</code>. Dry-run generates the service YAML, dit the selector before applying. For Part II, <code>custom-columns</code> with <code>--sort-by</code> is the exam-fast approach.`,
       yaml: `# === Part I ===
 kubectl config use-context cluster2
 
 # Find the discriminating labels for beta + gamma only:
 kubectl get pods --show-labels
-# beta:  env=dev,mode=exam,type=external
-# gamma: env=prod,mode=exam,type=external
-# Common unique labels: mode=exam,type=external
+# beta:  env=dev, ode=exam, type=external
+# gamma: env=prod, ode=exam, type=external
+# Common unique labels: mode=exam, type=external
 
 # Confirm only those two pods match:
-kubectl get pods -l mode=exam,type=external
+kubectl get pods -l mode=exam, type=external
 
 # Generate service YAML:
 kubectl create service clusterip radioactive-service \\
   --tcp=8080:80 --dry-run=client -o yaml > radioactive-service.yaml
 
-# Edit radioactive-service.yaml — change selector to:
+# Edit radioactive-service.yaml, change selector to:
 #   selector:
 #     mode: exam       # replaces default app: radioactive-service
 #     type: external
@@ -1343,27 +1493,27 @@ kubectl get ep radioactive-service
 
 # === Part II ===
 kubectl get pods -A \\
-  -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' \\
+  -o=custom-columns='POD_NAME:metadata.name, P_ADDR:status.podIP' \\
   --sort-by=.status.podIP > /root/pod_ips_ckad02_svcn`
     }
   },
   {
     id: 'me6-4', topic: 'design-build', difficulty: 'fail',
-    title: 'Mock Exam 6 Q19: CRD with openAPIV3Schema validation — string fields, integer min/max, Namespaced scope',
+    title: 'Mock Exam 6 Q19: CRD with openAPIV3Schema validation, tring fields, integer min/max, Namespaced scope',
     scenario: `On <code>cluster2</code>, a CRD file exists at <code>/root/ckad19-crd-aecs.yaml</code>. Add the following validation schema and set scope to <code>Namespaced</code>, then create it:<br><br>
-• <code>destinationName</code>, <code>country</code>, <code>city</code> — type: <code>string</code><br>
-• <code>pricePerNight</code> — type: <code>integer</code>, minimum: <code>50</code>, maximum: <code>5000</code><br>
-• <code>durationInDays</code> — type: <code>integer</code>, minimum: <code>1</code>, maximum: <code>30</code>`,
+• <code>destinationName</code>, <code>country</code>, <code>city</code>, type: <code>string</code><br>
+• <code>pricePerNight</code>, type: <code>integer</code>, minimum: <code>50</code>, maximum: <code>5000</code><br>
+• <code>durationInDays</code>, type: <code>integer</code>, minimum: <code>1</code>, maximum: <code>30</code>`,
     hint: {
       url: 'https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#validation',
       path: 'Tasks → Extend Kubernetes → CRDs → Validation',
-      tip: 'The schema goes under spec.versions[].schema.openAPIV3Schema. Structure: type: object → properties: spec: → type: object → properties: (your fields). scope: Namespaced goes under spec.scope. Apply with kubectl create -f, NOT apply — create fails loudly if wrong.'
+      tip: 'The schema goes under spec.versions[].schema.openAPIV3Schema. Structure: type: object → properties: spec: → type: object → properties: (your fields). scope: Namespaced goes under spec.scope. Apply with kubectl create -f, NOT apply, reate fails loudly if wrong.'
     },
     answer: {
       explanation: `Schema validation nests under <code>spec.versions[].schema.openAPIV3Schema.properties.spec.properties</code>. Each integer field gets <code>minimum</code> and <code>maximum</code>. Don't forget <code>scope: Namespaced</code> under <code>spec</code>.`,
       yaml: `kubectl config use-context cluster2
 
-# Edit /root/ckad19-crd-aecs.yaml — add under spec.versions[].schema:
+# Edit /root/ckad19-crd-aecs.yaml, add under spec.versions[].schema:
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1432,15 +1582,15 @@ cat /root/ckad21-exam.txt`
 
   {
     id: 'me5-5', topic: 'observability', difficulty: 'hard',
-    title: 'Debug pod stuck in Init:StartError — fix missing shell interpreter in init container command',
+    title: 'Debug pod stuck in Init:StartError, fix missing shell interpreter in init container command',
     scenario: `Pod <code>ckad-frontend-pod</code> in namespace <code>ckad-21-production</code> on <code>cluster3</code> is stuck in <code>Init:StartError</code>. Find the root cause and fix it to bring the pod to Running state.`,
     hint: {
       url: 'https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/',
       path: 'Tasks → Debug Applications → Debug Init Containers',
-      tip: 'Init:StartError means the init container process failed to start — the binary or interpreter doesn\'t exist or wasn\'t specified. Run "kubectl describe pod" and look at the init container\'s Last State / Message. Then get the pod YAML and check the command field — if you have a shell command without /bin/sh -c, the container can\'t run it.'
+      tip: 'Init:StartError means the init container process failed to start, the binary or interpreter doesn\'t exist or wasn\'t specified. Run "kubectl describe pod" and look at the init container\'s Last State / Message. Then get the pod YAML and check the command field, if you have a shell command without /bin/sh -c, the container can\'t run it.'
     },
     answer: {
-      explanation: `The init container had a shell command without the <code>/bin/sh -c</code> interpreter prefix. The container runtime tried to execute the string directly as a binary — which fails. Fix: prepend <code>/bin/sh</code> and <code>-c</code> to the command list.`,
+      explanation: `The init container had a shell command without the <code>/bin/sh -c</code> interpreter prefix. The container runtime tried to execute the string directly as a binary, hich fails. Fix: prepend <code>/bin/sh</code> and <code>-c</code> to the command list.`,
       yaml: `# 1. Check pod status
 kubectl get pods -n ckad-21-production
 
@@ -1452,7 +1602,7 @@ kubectl describe pod ckad-frontend-pod -n ckad-21-production
 # 3. Get the YAML
 kubectl get pod ckad-frontend-pod -n ckad-21-production -o yaml > fix-pod.yaml
 
-# 4. Find the init container command — it probably looks like:
+# 4. Find the init container command, it probably looks like:
 #   command:
 #   - "some shell command string"     ← missing interpreter!
 
@@ -1468,6 +1618,745 @@ kubectl apply -f fix-pod.yaml
 
 # 7. Verify
 kubectl get pods -n ckad-21-production`
+    }
+  },
+
+  // ════════════════════════ CKA QUESTIONS ════════════════════════════════════
+
+  // ── CKA: ETCD BACKUP & RESTORE ────────────────────────────────────────────
+  {
+    id: 'cka-etcd-1', topic: 'cka-etcd', difficulty: 'fail',
+    title: 'Backup etcd to /opt/etcd-backup.db on the controlplane',
+    scenario: `Take a snapshot backup of etcd at <code>/opt/etcd-backup.db</code> on the controlplane node using <code>etcdctl</code> v3 API. The TLS certs live under <code>/etc/kubernetes/pki/etcd/</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster',
+      path: 'Tasks → Administer a Cluster → Operating etcd → Backing up an etcd cluster',
+      tip: 'Search "backup etcd cluster", opy the snapshot save command. The exam wants: ETCDCTL_API=3 etcdctl snapshot save <path> --endpoints --cacert --cert --key. If unsure of cert paths, look in /etc/kubernetes/manifests/etcd.yaml.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Your documented fail (LL1 Q6):</span> "Never figured this one out." Memorize this one-liner, ll three TLS flags are mandatory or it hangs. The cert paths come from the etcd static pod manifest.`,
+      yaml: `# Always set v3 API
+export ETCDCTL_API=3
+
+# Snapshot save (the one-liner to memorize):
+etcdctl snapshot save /opt/etcd-backup.db \\
+  --endpoints=127.0.0.1:2379 \\
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \\
+  --cert=/etc/kubernetes/pki/etcd/server.crt \\
+  --key=/etc/kubernetes/pki/etcd/server.key
+
+# Verify the snapshot
+etcdctl --write-out=table snapshot status /opt/etcd-backup.db
+
+# If you don't know the cert paths, find them in the manifest:
+grep -E '(cert|key|ca)-file' /etc/kubernetes/manifests/etcd.yaml`
+    }
+  },
+  {
+    id: 'cka-etcd-2', topic: 'cka-etcd', difficulty: 'hard',
+    title: 'Restore etcd from a snapshot to a new data dir',
+    scenario: `An etcd snapshot exists at <code>/opt/snapshot.db</code>. Restore it into <code>/var/lib/etcd-from-backup</code>, then update the static pod manifest at <code>/etc/kubernetes/manifests/etcd.yaml</code> so etcd uses the restored data. Verify cluster recovers.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster',
+      path: 'Tasks → Administer a Cluster → Operating etcd → Restoring an etcd cluster',
+      tip: 'Two parts: (1) etcdctl snapshot restore --data-dir=<new-dir> creates the dir. (2) Edit /etc/kubernetes/manifests/etcd.yaml, change BOTH the --data-dir command arg AND the volumes.hostPath.path that mounts /var/lib/etcd. The kubelet auto-restarts the pod when the manifest changes.'
+    },
+    answer: {
+      explanation: `Two locations to update in the manifest: the <code>--data-dir</code> arg AND the <code>hostPath</code> volume. Miss either one and etcd reads the wrong data.`,
+      yaml: `# 1. Restore the snapshot to a new data dir
+ETCDCTL_API=3 etcdctl snapshot restore /opt/snapshot.db \\
+  --data-dir=/var/lib/etcd-from-backup
+
+# 2. Edit the static pod manifest
+vi /etc/kubernetes/manifests/etcd.yaml
+
+# Update TWO places:
+#   spec:
+#     containers:
+#     - command:
+#       - etcd
+#       - --data-dir=/var/lib/etcd-from-backup    <-- (was /var/lib/etcd)
+#     volumes:
+#     - hostPath:
+#         path: /var/lib/etcd-from-backup         <-- (was /var/lib/etcd)
+#         type: DirectoryOrCreate
+#       name: etcd-data
+
+# 3. Kubelet detects the change and restarts etcd
+# Wait ~30s, then verify:
+kubectl get pods -n kube-system | grep etcd
+kubectl get nodes`
+    }
+  },
+  {
+    id: 'cka-etcd-3', topic: 'cka-etcd', difficulty: 'medium',
+    title: 'Find the current etcd data dir + cert paths from a running cluster',
+    scenario: `You SSH into a brand new cluster's controlplane and need to back up etcd, but you don't know its data dir or cert locations. Find both, then take a snapshot to <code>/opt/cluster-backup.db</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster',
+      path: 'Tasks → Administer a Cluster → Operating etcd',
+      tip: 'For kubeadm clusters, etcd runs as a static pod, its config lives in /etc/kubernetes/manifests/etcd.yaml. grep for "data-dir", "cert-file", "key-file", "trusted-ca-file" to extract every path.'
+    },
+    answer: {
+      explanation: `Always find paths from the live manifest, on't assume defaults. Different distros put certs in different places.`,
+      yaml: `# Inspect the running etcd static pod manifest
+cat /etc/kubernetes/manifests/etcd.yaml | grep -E '(data-dir|cert-file|key-file|trusted-ca-file|listen-client-urls)'
+
+# Typical output (kubeadm):
+#   --cert-file=/etc/kubernetes/pki/etcd/server.crt
+#   --key-file=/etc/kubernetes/pki/etcd/server.key
+#   --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+#   --data-dir=/var/lib/etcd
+#   --listen-client-urls=https://127.0.0.1:2379, ttps://10.x.x.x:2379
+
+# Take the snapshot
+ETCDCTL_API=3 etcdctl snapshot save /opt/cluster-backup.db \\
+  --endpoints=127.0.0.1:2379 \\
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \\
+  --cert=/etc/kubernetes/pki/etcd/server.crt \\
+  --key=/etc/kubernetes/pki/etcd/server.key`
+    }
+  },
+
+  // ── CKA: JSONPATH & CUSTOM COLUMNS ────────────────────────────────────────
+  {
+    id: 'cka-jp-1', topic: 'cka-jsonpath', difficulty: 'fail',
+    title: 'List deployments as table: NAME, IMAGE, READY, NAMESPACE, orted by name',
+    scenario: `Print the deployments in namespace <code>admin2406</code> in this format and write to <code>/opt/admin2406_data</code>:<br><br>
+<code>DEPLOYMENT&nbsp;&nbsp;&nbsp;CONTAINER_IMAGE&nbsp;&nbsp;&nbsp;READY_REPLICAS&nbsp;&nbsp;&nbsp;NAMESPACE</code><br>
+<code>deploy0&nbsp;&nbsp;&nbsp;nginx:alpine&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;admin2406</code><br><br>
+Sort by deployment name ascending.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/quick-reference/',
+      path: 'Reference → kubectl Cheat Sheet (search "custom-columns")',
+      tip: 'Pattern: kubectl get <kind> -o custom-columns=<HEADER>:.<jsonpath>,<HEADER>:.<jsonpath> --sort-by=<jsonpath>. The cheat sheet has copy-paste examples, uicker than the JSONPath reference.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Your documented fail (LL1 Q2):</span> "Didn't attempt, couldn't figure out JSONPATH syntax." Memorize this exact pattern. The container image path uses <code>[]</code> (no index = first container). Sort goes outside custom-columns.`,
+      yaml: `kubectl -n admin2406 get deployment \\
+  -o custom-columns=DEPLOYMENT:.metadata.name, ONTAINER_IMAGE:.spec.template.spec.containers[].image, EADY_REPLICAS:.status.readyReplicas, AMESPACE:.metadata.namespace \\
+  --sort-by=.metadata.name \\
+  > /opt/admin2406_data
+
+# Verify formatting
+cat /opt/admin2406_data
+
+# Memorize these jsonpaths (no leading dot inside custom-columns):
+#   .metadata.name
+#   .metadata.namespace
+#   .spec.template.spec.containers[].image     <-- [] means "all", first by default
+#   .status.readyReplicas`
+    }
+  },
+  {
+    id: 'cka-jp-2', topic: 'cka-jsonpath', difficulty: 'medium',
+    title: 'Get all pod IPs across all namespaces sorted by IP',
+    scenario: `Write all pod names and pod IPs (across all namespaces) to <code>/root/pod_ips.txt</code>, sorted ascending by IP. Format: <code>POD_NAME&nbsp;&nbsp;&nbsp;&nbsp;IP_ADDR</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/',
+      path: 'Reference → kubectl → kubectl get',
+      tip: '-A means all namespaces. --sort-by takes a jsonpath WITH leading dot. custom-columns paths do NOT have leading dot.'
+    },
+    answer: {
+      explanation: `Two gotchas: <code>--sort-by</code> needs a leading dot, but the paths inside <code>custom-columns</code> do not.`,
+      yaml: `kubectl get pods -A \\
+  -o=custom-columns='POD_NAME:metadata.name, P_ADDR:status.podIP' \\
+  --sort-by=.status.podIP \\
+  > /root/pod_ips.txt
+
+# Inspect:
+head -5 /root/pod_ips.txt`
+    }
+  },
+  {
+    id: 'cka-jp-3', topic: 'cka-jsonpath', difficulty: 'medium',
+    title: 'JSONPath: extract a single field with -o jsonpath',
+    scenario: `Print just the container image of the pod <code>nginx</code> in the default namespace. Then print the names of all nodes in a space-separated list.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/kubectl/jsonpath/',
+      path: 'Reference → kubectl → JSONPath Support',
+      tip: 'jsonpath uses {} brackets around the expression. {.spec.containers[0].image} for one image. {range .items[*]}{.metadata.name}{" "}{end} to iterate.'
+    },
+    answer: {
+      explanation: `JSONPath wraps the expression in <code>{}</code>. <code>range</code> + <code>end</code> iterates a list. The single-quote around the whole expression keeps shell from eating the braces.`,
+      yaml: `# Single field
+kubectl get pod nginx -o jsonpath='{.spec.containers[0].image}'
+
+# Iterate over a list (all node names, space-separated)
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" "}{end}'
+
+# Multi-field with literals
+kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\\t"}{.status.podIP}{"\\n"}{end}'
+
+# All container images in cluster, deduped (common interview/exam question)
+kubectl get pods -A -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\\n' | sort -u`
+    }
+  },
+
+  // ── CKA: KUBEADM CLUSTER UPGRADES ─────────────────────────────────────────
+  {
+    id: 'cka-up-1', topic: 'cka-upgrade', difficulty: 'hard',
+    title: 'Upgrade controlplane from v1.34 to v1.35 with kubeadm',
+    scenario: `Upgrade the controlplane node from <code>v1.34.0</code> to <code>v1.35.0</code> using kubeadm. Drain the controlplane first. After upgrade, uncordon. Do not touch worker nodes yet.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/',
+      path: 'Tasks → Administer a Cluster → kubeadm → Upgrading kubeadm clusters',
+      tip: 'Use the version-pinned doc URL: v1-35.docs.kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/. The apt sources line MUST match your target minor (pkgs.k8s.io/core:/stable:/v1.35/deb/). Sequence: drain → unhold → install kubeadm → upgrade plan → upgrade apply → install kubelet+kubectl → daemon-reload → restart kubelet → uncordon.'
+    },
+    answer: {
+      explanation: `<span class="highlight">The two repeating mistakes:</span> (1) forgetting to update <code>/etc/apt/sources.list.d/kubernetes.list</code> to the new minor version's repo. (2) forgetting <code>apt-mark unhold</code> / <code>apt-mark hold</code> around the install.`,
+      yaml: `# 1. Drain the controlplane
+kubectl drain controlplane --ignore-daemonsets
+
+# 2. Update the apt repo to the target minor
+# Edit /etc/apt/sources.list.d/kubernetes.list, change v1.34 to v1.35:
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' \\
+  | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt update
+sudo apt-cache madison kubeadm   # confirm 1.35.0-1.1 is available
+
+# 3. Upgrade kubeadm itself
+sudo apt-mark unhold kubeadm
+sudo apt-get install -y kubeadm='1.35.0-1.1'
+sudo apt-mark hold kubeadm
+kubeadm version
+
+# 4. Plan + apply (only on FIRST controlplane)
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply v1.35.0
+
+# 5. Upgrade kubelet + kubectl
+sudo apt-mark unhold kubelet kubectl
+sudo apt-get install -y kubelet='1.35.0-1.1' kubectl='1.35.0-1.1'
+sudo apt-mark hold kubelet kubectl
+
+# 6. Restart kubelet
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+# 7. Uncordon
+kubectl uncordon controlplane
+kubectl get nodes   # controlplane should show v1.35.0 Ready`
+    }
+  },
+  {
+    id: 'cka-up-2', topic: 'cka-upgrade', difficulty: 'medium',
+    title: 'Upgrade a worker node and reschedule a deployment to controlplane during downtime',
+    scenario: `Worker <code>node01</code> needs to be upgraded to v1.35.0. Before draining, reschedule the <code>gold-nginx</code> deployment so it ends up on the controlplane (which has been freshly upgraded and uncordoned). Use a node selector or affinity to pin it. Then drain node01 and upgrade.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-worker-nodes',
+      path: 'Tasks → Administer a Cluster → kubeadm → Upgrade worker nodes',
+      tip: 'On worker nodes the command is "kubeadm upgrade node" (NOT "upgrade apply"). Before draining: edit the deployment to add a nodeSelector pointing to controlplane (label kubernetes.io/hostname=controlplane). Pods will reschedule, then drain is safe.'
+    },
+    answer: {
+      explanation: `Worker upgrade uses <code>kubeadm upgrade node</code> (no plan/apply). Pin the deployment to controlplane with a nodeSelector before draining so it doesn't go pending.`,
+      yaml: `# 1. Pin gold-nginx to controlplane BEFORE draining node01
+kubectl edit deploy gold-nginx
+# Under spec.template.spec, add:
+#   nodeSelector:
+#     kubernetes.io/hostname: controlplane
+# (or use --overrides / kubectl patch)
+
+# Verify pods reschedule:
+kubectl get pods -o wide
+
+# 2. Drain node01
+kubectl drain node01 --ignore-daemonsets
+
+# 3. SSH to node01 and upgrade kubeadm
+ssh node01
+sudo apt-mark unhold kubeadm
+sudo apt-get install -y kubeadm='1.35.0-1.1'
+sudo apt-mark hold kubeadm
+
+# 4. Worker uses "upgrade node" (NOT plan/apply)
+sudo kubeadm upgrade node
+
+# 5. Upgrade kubelet + kubectl
+sudo apt-mark unhold kubelet kubectl
+sudo apt-get install -y kubelet='1.35.0-1.1' kubectl='1.35.0-1.1'
+sudo apt-mark hold kubelet kubectl
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+exit
+
+# 6. Uncordon node01
+kubectl uncordon node01
+kubectl get nodes`
+    }
+  },
+
+  // ── CKA: STATIC PODS ──────────────────────────────────────────────────────
+  {
+    id: 'cka-sp-1', topic: 'cka-static-pod', difficulty: 'hard',
+    title: 'Create a static pod nginx-critical on cluster1-node01',
+    scenario: `Create a static pod called <code>nginx-critical</code> with image <code>nginx</code> on <code>cluster1-node01</code>. It must restart automatically on failure. Use <code>/etc/kubernetes/manifests</code> as the static pod path.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/',
+      path: 'Tasks → Configure Pods and Containers → Create static Pods',
+      tip: 'Generate the pod YAML with --dry-run=client on the controlplane, scp it to the node, then drop it into /etc/kubernetes/manifests/. The kubelet picks it up automatically. Verify staticPodPath in /var/lib/kubelet/config.yaml. The mirror pod name will be nginx-critical-cluster1-node01.'
+    },
+    answer: {
+      explanation: `Static pods are managed directly by the kubelet on the node, ot the API server. The kubelet creates a "mirror pod" in the API for visibility. Filename in <code>/etc/kubernetes/manifests/</code> doesn't have to match the pod name.`,
+      yaml: `# 1. Generate the pod YAML on the controlplane
+kubectl run nginx-critical --image=nginx \\
+  --dry-run=client -o yaml > static.yaml
+
+# 2. Copy to the node
+scp static.yaml cluster1-node01:/root/
+
+# 3. SSH to the node
+ssh cluster1-node01
+
+# 4. (If needed) confirm kubelet's staticPodPath
+grep staticPodPath /var/lib/kubelet/config.yaml
+# Expected: staticPodPath: /etc/kubernetes/manifests
+
+# 5. Move the manifest into the static pod dir
+sudo mkdir -p /etc/kubernetes/manifests
+sudo cp /root/static.yaml /etc/kubernetes/manifests/
+
+# 6. Verify (back on controlplane)
+exit
+kubectl get pods -A | grep nginx-critical
+# Mirror pod name: nginx-critical-cluster1-node01`
+    }
+  },
+  {
+    id: 'cka-sp-2', topic: 'cka-static-pod', difficulty: 'easy',
+    title: 'Find the staticPodPath on a node and list all static pods',
+    scenario: `On a node, find which directory is configured as the kubelet's static pod path, then list every static pod manifest in it.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/',
+      path: 'Tasks → Configure Pods → Create static Pods',
+      tip: 'Two places to check: (1) /var/lib/kubelet/config.yaml has staticPodPath. (2) systemd unit overrides may pass --pod-manifest-dir. ps -ef | grep kubelet shows the actual flags being used.'
+    },
+    answer: {
+      explanation: `Always confirm via the running kubelet process, the config file may be overridden.`,
+      yaml: `# Method 1: kubelet config file
+grep staticPodPath /var/lib/kubelet/config.yaml
+
+# Method 2: running process flags (shows overrides)
+ps -ef | grep kubelet | grep -oE 'pod-manifest-dir[^ ]+'
+# or
+systemctl cat kubelet | grep -i manifest
+
+# List the static pod manifests
+ls -la /etc/kubernetes/manifests/
+# kube-apiserver.yaml, kube-controller-manager.yaml, kube-scheduler.yaml, etcd.yaml`
+    }
+  },
+
+  // ── CKA: CSR & RBAC USERS ─────────────────────────────────────────────────
+  {
+    id: 'cka-csr-1', topic: 'cka-csr-rbac', difficulty: 'hard',
+    title: 'Create CSR john-developer, approve it, and grant Pod CRUD in development namespace',
+    scenario: `Create a user <code>john</code>. Use the existing key/csr at <code>/root/CKA/john.key</code> and <code>/root/CKA/john.csr</code>. Create a CSR named <code>john-developer</code> with signerName <code>kubernetes.io/kube-apiserver-client</code>, approve it, then create a Role <code>developer</code> granting <strong>create, list, get, update, delete</strong> on pods in the <code>development</code> namespace, and bind it to john.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/',
+      path: 'Reference → Access, Authn, Authz → Certificate Signing Requests',
+      tip: 'The "request" field is the .csr file contents base64-encoded ON ONE LINE. Use: cat /root/CKA/john.csr | base64 -w 0. Then: kubectl certificate approve john-developer. Then: kubectl create role/rolebinding imperatively.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Three steps, exam-fast:</span> base64-encode the CSR (<code>-w 0</code> = no line wrap), apply the CSR YAML, approve, then create role + binding imperatively.`,
+      yaml: `# 1. Base64-encode the CSR ON ONE LINE
+REQ=$(cat /root/CKA/john.csr | base64 -w 0)
+
+# 2. Create the CSR resource
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: john-developer
+spec:
+  signerName: kubernetes.io/kube-apiserver-client
+  request: $REQ
+  usages:
+  - digital signature
+  - key encipherment
+  - client auth
+EOF
+
+# 3. Approve the CSR
+kubectl certificate approve john-developer
+kubectl get csr john-developer        # should show Approved, ssued
+
+# 4. Create role + binding (imperative is faster)
+kubectl create role developer \\
+  --resource=pods \\
+  --verb=create,list,get,update,delete \\
+  --namespace=development
+
+kubectl create rolebinding developer-role-binding \\
+  --role=developer --user=john \\
+  --namespace=development
+
+# 5. Verify John's permissions
+kubectl auth can-i update pods --as=john --namespace=development
+# yes`
+    }
+  },
+  {
+    id: 'cka-csr-2', topic: 'cka-csr-rbac', difficulty: 'medium',
+    title: 'Restrict a Role to a single named ConfigMap',
+    scenario: `Create a Role <code>configmap-updater</code> in namespace <code>secure-ns</code> that grants <code>get, update</code> on configmaps, but ONLY for the configmap named <code>app-config</code>. Bind it to user <code>maint</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources',
+      path: 'Reference → RBAC Authorization → Referring to resources',
+      tip: 'kubectl create role supports --resource-name to scope a rule to a specific named instance. In the YAML this maps to "resourceNames" inside the rule.'
+    },
+    answer: {
+      explanation: `<code>resourceNames</code> is the magic field, ithout it the Role applies to all configmaps in the namespace.`,
+      yaml: `# Imperative (one shot)
+kubectl create role configmap-updater \\
+  --namespace=secure-ns \\
+  --resource=configmaps \\
+  --resource-name=app-config \\
+  --verb=get,update
+
+kubectl create rolebinding configmap-updater-binding \\
+  --namespace=secure-ns \\
+  --role=configmap-updater \\
+  --user=maint
+
+# Verify scope
+kubectl auth can-i update configmap/app-config --as=maint -n secure-ns   # yes
+kubectl auth can-i update configmap/other      --as=maint -n secure-ns   # no
+
+# Resulting Role YAML:
+# rules:
+# - apiGroups: [""]
+#   resources: ["configmaps"]
+#   resourceNames: ["app-config"]   # the restriction
+#   verbs: ["get", "update"]`
+    }
+  },
+
+  // ── CKA: DNS & SERVICE DISCOVERY ──────────────────────────────────────────
+  {
+    id: 'cka-dns-1', topic: 'cka-dns', difficulty: 'medium',
+    title: 'nslookup a Service from inside the cluster, save output to a file',
+    scenario: `Create a pod <code>nginx-resolver</code> (image <code>nginx</code>), expose it as <code>nginx-resolver-service</code> (ClusterIP, port 80). From a temporary <code>busybox:1.28</code> pod, nslookup the service name and write the output to <code>/root/CKA/nginx.svc</code>. Then look up the pod by its IP and write to <code>/root/CKA/nginx.pod</code>.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/',
+      path: 'Concepts → Services, LB & Networking → DNS for Services and Pods',
+      tip: 'Use busybox:1.28 specifically, ewer busybox images break nslookup against CoreDNS. Pod DNS form: <a-b-c-d>.<ns>.pod.cluster.local (dashes, NOT dots, in the IP). Use kubectl run --rm -it --restart=Never to get a one-shot pod.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Two gotchas:</span> (1) busybox >1.28 has a broken nslookup. (2) Pod DNS uses dashes in the IP and namespace.pod, while service uses service.namespace.svc.`,
+      yaml: `# 1. Create the resolver pod + ClusterIP service
+kubectl run nginx-resolver --image=nginx
+kubectl expose pod nginx-resolver \\
+  --name=nginx-resolver-service --port=80 --target-port=80 --type=ClusterIP
+
+# 2. Look up by service name
+kubectl run test-nslookup --image=busybox:1.28 --rm -it --restart=Never \\
+  -- nslookup nginx-resolver-service > /root/CKA/nginx.svc
+
+# 3. Get the pod IP and convert dots to dashes
+POD_IP=$(kubectl get pod nginx-resolver -o jsonpath='{.status.podIP}')
+DASHED=$(echo $POD_IP | tr '.' '-')
+
+# 4. Look up by pod DNS (dashed IP + .default.pod)
+kubectl run test-nslookup --image=busybox:1.28 --rm -it --restart=Never \\
+  -- nslookup $DASHED.default.pod > /root/CKA/nginx.pod
+
+# DNS forms:
+#   Service: <svc>.<ns>.svc.cluster.local
+#   Pod:     <a-b-c-d>.<ns>.pod.cluster.local`
+    }
+  },
+  {
+    id: 'cka-dns-2', topic: 'cka-dns', difficulty: 'easy',
+    title: 'Debug: pod cannot resolve service name (CoreDNS sanity check)',
+    scenario: `A pod cannot resolve <code>my-service</code>. Confirm CoreDNS is healthy and the pod's <code>/etc/resolv.conf</code> points at the cluster DNS service.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/',
+      path: 'Tasks → Administer a Cluster → Debugging DNS Resolution',
+      tip: 'Three checks: (1) CoreDNS pods Running in kube-system. (2) kube-dns service has endpoints. (3) Pod\'s /etc/resolv.conf nameserver is the kube-dns ClusterIP.'
+    },
+    answer: {
+      explanation: `Walk the chain: CoreDNS pods → kube-dns service → pod resolv.conf. Any broken link breaks DNS.`,
+      yaml: `# 1. CoreDNS pods healthy?
+kubectl get pods -n kube-system -l k8s-app=kube-dns
+kubectl logs -n kube-system -l k8s-app=kube-dns --tail=20
+
+# 2. kube-dns service has endpoints?
+kubectl get svc -n kube-system kube-dns
+kubectl get endpoints -n kube-system kube-dns
+
+# 3. From inside any pod, what DNS server is it using?
+kubectl exec <pod> -- cat /etc/resolv.conf
+# Expected:
+#   nameserver 10.96.0.10           # kube-dns ClusterIP
+#   search default.svc.cluster.local svc.cluster.local cluster.local
+
+# 4. Test resolution from the same pod
+kubectl exec <pod> -- nslookup my-service
+kubectl exec <pod> -- nslookup kubernetes.default`
+    }
+  },
+
+  // ── CKA: CNI NETWORKING ───────────────────────────────────────────────────
+  {
+    id: 'cka-cni-1', topic: 'cka-cni', difficulty: 'hard',
+    title: 'Install Calico CNI with a custom pod CIDR (172.17.0.0/16)',
+    scenario: `Install Calico on a fresh cluster using the tigera operator. Override the default IP pool to use CIDR <code>172.17.0.0/16</code>. Verify pods can communicate after install.`,
+    hint: {
+      url: 'https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart',
+      path: 'docs.tigera.io → Calico → Quickstart for Kubernetes',
+      tip: 'Two manifests: tigera-operator.yaml (the operator itself) + custom-resources.yaml (the Installation CR with your CIDR). Use kubectl create (NOT apply) on tigera-operator.yaml, pply hits a 262144-byte annotation limit. Edit the CIDR in custom-resources.yaml before applying.'
+    },
+    answer: {
+      explanation: `<span class="highlight">The "kubectl apply" trap:</span> tigera-operator.yaml has a CRD with annotations that exceed apply's 262144-byte limit. Use <code>kubectl create -f</code> instead.`,
+      yaml: `# 1. Install the operator (use create, not apply)
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/tigera-operator.yaml
+
+# 2. Download the Installation CR
+curl -O https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml
+
+# 3. Edit custom-resources.yaml, change the cidr:
+# spec:
+#   calicoNetwork:
+#     ipPools:
+#     - name: default-ipv4-ippool
+#       blockSize: 26
+#       cidr: 172.17.0.0/16              <-- CHANGE THIS
+#       encapsulation: VXLANCrossSubnet
+#       natOutgoing: Enabled
+#       nodeSelector: all()
+
+# 4. Apply the Installation CR (this one is small, apply works)
+kubectl create -f custom-resources.yaml
+
+# 5. Watch Calico come up (takes 1-2 minutes)
+watch kubectl get pods -n calico-system
+
+# 6. Test pod-to-pod
+kubectl run web --image=nginx
+WEB_IP=$(kubectl get pod web -o jsonpath='{.status.podIP}')
+kubectl run test --rm -it --image=nicolaka/netshoot --restart=Never -- curl $WEB_IP`
+    }
+  },
+
+  // ── CKA: GATEWAY API ──────────────────────────────────────────────────────
+  {
+    id: 'cka-gw-1', topic: 'cka-gateway', difficulty: 'medium',
+    title: 'Create a Gateway with HTTP listener on port 80',
+    scenario: `Create a Gateway resource:<br>• name: <code>web-gateway</code><br>• namespace: <code>nginx-gateway</code><br>• gatewayClassName: <code>nginx</code><br>• Listener: protocol HTTP, port 80, name <code>http</code>`,
+    hint: {
+      url: 'https://gateway-api.sigs.k8s.io/api-types/gateway/',
+      path: 'gateway-api.sigs.k8s.io → API Types → Gateway',
+      tip: 'apiVersion: gateway.networking.k8s.io/v1. Gateway has spec.gatewayClassName + spec.listeners[]. A listener needs name, protocol, port (and tls/hostname when needed).'
+    },
+    answer: {
+      explanation: `Minimal Gateway: a class name and one listener. Each listener needs a unique <code>name</code>.`,
+      yaml: `apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web-gateway
+  namespace: nginx-gateway
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+
+# Apply and verify the gateway is ACCEPTED
+kubectl apply -f gateway.yaml
+kubectl get gateway -n nginx-gateway
+kubectl describe gateway web-gateway -n nginx-gateway`
+    }
+  },
+  {
+    id: 'cka-gw-2', topic: 'cka-gateway', difficulty: 'hard',
+    title: 'Convert HTTP Gateway to HTTPS on 443 with TLS for kodekloud.com',
+    scenario: `An existing Gateway <code>web-gateway</code> in namespace <code>cka5673</code> currently listens on port 80 (HTTP). Modify it to listen on 443 with HTTPS for hostname <code>kodekloud.com</code>, using TLS cert from secret <code>kodekloud-tls</code>.`,
+    hint: {
+      url: 'https://gateway-api.sigs.k8s.io/guides/tls/',
+      path: 'gateway-api.sigs.k8s.io → Guides → TLS',
+      tip: 'Replace the listener entirely: protocol HTTPS, port 443, hostname, and tls.certificateRefs[].name pointing at the secret. tls.mode defaults to Terminate (which is what you want).'
+    },
+    answer: {
+      explanation: `For HTTPS termination, the listener needs <code>protocol: HTTPS</code>, <code>port: 443</code>, <code>hostname</code>, and <code>tls.certificateRefs</code>. The secret must be a <code>kubernetes.io/tls</code> secret in the same namespace as the Gateway (or referenced cross-namespace via ReferenceGrant).`,
+      yaml: `apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web-gateway
+  namespace: cka5673
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: kodekloud.com
+    tls:
+      certificateRefs:
+      - name: kodekloud-tls       # must be in same ns or use ReferenceGrant
+
+# Apply
+kubectl apply -f web-gateway.yaml
+
+# Verify
+kubectl get gateway -n cka5673 web-gateway -o yaml | grep -A6 listeners`
+    }
+  },
+
+  // ── CKA: CLUSTER TROUBLESHOOTING ──────────────────────────────────────────
+  {
+    id: 'cka-ts-1', topic: 'cka-troubleshoot', difficulty: 'medium',
+    title: 'Fix kubeconfig: server URL has wrong port',
+    scenario: `<code>/root/CKA/admin.kubeconfig</code> exists but kubectl fails. The cluster's apiserver runs on the standard port. Inspect and fix the file.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/',
+      path: 'Concepts → Configuration → Organize Cluster Access using kubeconfig',
+      tip: 'Test with: kubectl --kubeconfig=/root/CKA/admin.kubeconfig get nodes. Common issue: the server: URL has the wrong port (e.g. 1234 instead of 6443). Fix in clusters[].cluster.server.'
+    },
+    answer: {
+      explanation: `kubeadm clusters always use port <strong>6443</strong> for the apiserver. If the kubeconfig shows anything else (1234, 8080, etc.), correct it.`,
+      yaml: `# Test the failing kubeconfig
+kubectl --kubeconfig=/root/CKA/admin.kubeconfig get nodes
+
+# Inspect it
+cat /root/CKA/admin.kubeconfig
+
+# Fix the server URL
+vi /root/CKA/admin.kubeconfig
+# Change:
+#   clusters:
+#   - cluster:
+#       certificate-authority-data: ...
+#       server: https://controlplane:1234     <-- WRONG
+# To:
+#       server: https://controlplane:6443     <-- 6443 is the apiserver port
+
+# Verify
+kubectl --kubeconfig=/root/CKA/admin.kubeconfig get nodes`
+    }
+  },
+  {
+    id: 'cka-ts-2', topic: 'cka-troubleshoot', difficulty: 'hard',
+    title: 'kubectl not working at all, iagnose the control plane',
+    scenario: `On <code>cluster2-controlplane</code>, kubectl commands fail (connection refused / timeout). Bring kubectl back to a working state.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/',
+      path: 'Tasks → Debug → Troubleshooting Clusters',
+      tip: 'Walk the stack: (1) is kubelet running? systemctl status kubelet → journalctl -u kubelet -f. (2) is the apiserver static pod healthy? crictl ps + crictl logs. (3) check /etc/kubernetes/manifests/kube-apiserver.yaml for typos in --etcd-servers / --service-cluster-ip-range / cert paths. (4) /etc/kubernetes/admin.conf permissions and KUBECONFIG.'
+    },
+    answer: {
+      explanation: `Most cluster2 troubleshooting tasks come down to: a typo in <code>/etc/kubernetes/manifests/kube-apiserver.yaml</code>, a stopped kubelet, or a bad <code>KUBECONFIG</code>. Walk the stack from kubelet → static pods → manifest.`,
+      yaml: `# 1. Is the kubelet running?
+systemctl status kubelet
+# If not: systemctl start kubelet
+journalctl -u kubelet -n 50 --no-pager
+
+# 2. Are the static control plane pods running?
+sudo crictl ps -a | grep -E 'apiserver|controller|scheduler|etcd'
+# If apiserver is missing/crashing:
+sudo crictl logs <container-id>
+
+# 3. Inspect the apiserver manifest for typos
+cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -E '(etcd|cert|key|client-ca|tls)'
+# Common breakage: wrong --etcd-servers URL, wrong cert path,
+# accidentally renamed file in /etc/kubernetes/pki/
+
+# 4. KUBECONFIG sanity
+echo $KUBECONFIG
+ls -l /etc/kubernetes/admin.conf
+# If empty:
+export KUBECONFIG=/etc/kubernetes/admin.conf
+# Or for kubeadm default:
+mkdir -p $HOME/.kube
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# 5. Final test
+kubectl get nodes`
+    }
+  },
+  {
+    id: 'cka-ts-3', topic: 'cka-troubleshoot', difficulty: 'hard',
+    title: 'Deployment pods stuck pending due to ResourceQuota, fix without changing limits or quota',
+    scenario: `Deployment <code>backend-api</code> shows 2/3 ready. The third pod fails to schedule. There is a <code>ResourceQuota</code> <code>cpu-mem-quota</code> in the default namespace. <strong>You may NOT edit the deployment's resource limits or the ResourceQuota.</strong> Make all 3 pods Running.`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/policy/resource-quotas/',
+      path: 'Concepts → Policies → Resource Quotas',
+      tip: 'Trick wording,"limits" must not change, but the deployment\'s resource REQUESTS can be reduced (limits ≠ requests). kubectl describe rs to see the exact "exceeded quota" error. Lower spec.template.spec.containers[].resources.requests, then delete the old ReplicaSet to force the new pod template to take effect.'
+    },
+    answer: {
+      explanation: `<span class="highlight">Wording trap:</span> "limits" in the prompt means the limits field, ou can still adjust <code>requests</code>. Reducing <code>requests.memory</code>/<code>cpu</code> fits the deployment under the quota, with limits untouched.`,
+      yaml: `# 1. See the deployment status
+kubectl get deploy backend-api
+# Output: backend-api 2/3 ...
+
+# 2. Find the failing ReplicaSet event
+kubectl get rs
+kubectl describe rs backend-api-7977bfdbd5
+# Look for: "exceeded quota: cpu-mem-quota,
+#            requested: requests.memory=128Mi, used: 256Mi, limited: 300Mi"
+
+# 3. Edit the deployment, educe REQUESTS only (limits unchanged)
+kubectl edit deployment backend-api
+# spec.template.spec.containers[].resources:
+#   requests:
+#     cpu: "50m"           <-- was 100m
+#     memory: "90Mi"       <-- was 128Mi (now 3 x 90 = 270Mi, fits in 300Mi)
+#   limits:
+#     cpu: "150m"          <-- UNCHANGED
+#     memory: "150Mi"      <-- UNCHANGED
+
+# 4. Old RS may still exist, elete it to clear stuck pods
+kubectl get rs
+kubectl delete rs backend-api-7977bfdbd5
+
+# 5. Verify
+kubectl get pods                    # 3/3 Running
+kubectl describe deploy backend-api | grep Limits   # limits unchanged
+kubectl describe quota cpu-mem-quota                # quota unchanged`
+    }
+  },
+  {
+    id: 'cka-ts-4', topic: 'cka-troubleshoot', difficulty: 'medium',
+    title: 'PVC stuck Pending, fix size/selector mismatch without altering the PV',
+    scenario: `A deployment <code>alpha-mysql</code> in namespace <code>alpha</code> has pods stuck in Pending. There's a PV <code>alpha-pv</code> already created. The pods should mount it at <code>/var/lib/mysql</code> with env <code>MYSQL_ALLOW_EMPTY_PASSWORD=1</code>. <strong>Do NOT alter the PV.</strong>`,
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/storage/persistent-volumes/#binding',
+      path: 'Concepts → Storage → Persistent Volumes → Binding',
+      tip: 'PVCs bind to PVs only when storage size, accessModes, and (if present) selector labels all match. kubectl describe pvc shows the binding error. Fix the PVC (or the deployment\'s PVC ref / volume mount), ever touch the PV.'
+    },
+    answer: {
+      explanation: `Binding requires: PVC.requests.storage ≤ PV.capacity, accessModes overlap, and PVC.selector matches PV.labels (when set). Adjust the PVC, not the PV.`,
+      yaml: `# 1. See what the PV exposes
+kubectl get pv alpha-pv -o yaml
+# Note: capacity, accessModes, labels (if any), storageClassName
+
+# 2. See why the PVC isn't binding
+kubectl describe pvc -n alpha
+# "no PV available" usually means storage size or selector mismatch
+
+# 3. Edit the PVC to match the PV
+kubectl edit pvc <pvc-name> -n alpha
+# Common fixes:
+#   spec.resources.requests.storage: <= PV capacity (e.g. 500Mi instead of 1Gi)
+#   spec.accessModes: overlap with PV (e.g. ReadWriteOnce)
+#   spec.selector.matchLabels: match PV's labels exactly
+#   spec.storageClassName: must match (often "" / manual / standard)
+
+# 4. Make sure the deployment has the env + volume mount
+kubectl edit deploy alpha-mysql -n alpha
+# spec.template.spec.containers[].env:
+# - name: MYSQL_ALLOW_EMPTY_PASSWORD
+#   value: "1"
+# spec.template.spec.containers[].volumeMounts:
+# - name: data
+#   mountPath: /var/lib/mysql
+
+# 5. Verify
+kubectl get pvc -n alpha            # Bound
+kubectl get pods -n alpha           # Running`
     }
   },
 ];
@@ -1513,19 +2402,28 @@ function renderSidebar() {
   const start = existing.indexOf('<div class="sidebar-section" style="margin-top:8px">');
   const staticPart = existing.substring(0, start);
 
-  let html = staticPart + '<div class="sidebar-section" style="margin-top:8px">CKAD Topics</div>';
-  TOPICS.forEach(t => {
+  const renderTopicBtn = (t) => {
     const prog = getTopicProgress(t.id);
     const pct  = prog.total ? Math.round(prog.known / prog.total * 100) : 0;
     const failCount = QUESTIONS.filter(q => q.topic === t.id && q.difficulty === 'fail').length;
-    html += `
+    return `
       <button class="topic-btn ${currentTopic === t.id ? 'active' : ''}" onclick="showTopic('${t.id}')" id="nav-${t.id}">
-        <span>${t.icon}</span> ${t.label}
+        <i class="ph ph-${t.icon}"></i> ${t.label}
         ${failCount ? `<span class="failed-badge">FAILED ${failCount}x</span>` : ''}
         <span class="count">${prog.known}/${prog.total}</span>
       </button>
       <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>`;
-  });
+  };
+
+  const ckaTopics  = TOPICS.filter(t => t.cert === 'cka');
+  const ckadTopics = TOPICS.filter(t => (t.cert || 'ckad') === 'ckad');
+
+  let html = staticPart;
+  html += '<div class="sidebar-section" style="margin-top:8px">CKA</div>';
+  ckaTopics.forEach(t => { html += renderTopicBtn(t); });
+  html += '<div class="sidebar-section" style="margin-top:14px">CKAD</div>';
+  ckadTopics.forEach(t => { html += renderTopicBtn(t); });
+
   sidebar.innerHTML = html;
 }
 
@@ -1554,17 +2452,16 @@ function renderMain() {
 
   let html = `
     <div class="topic-header">
-      <h2>${topic.icon} ${topic.label}</h2>
-      <div class="subtitle">${topic.subtitle}</div>
+      <h2><i class="ph ph-${topic.icon}"></i> ${topic.label}</h2>
     </div>
     <div class="docs-nav">
-      <h3>📖 Find this in the Docs</h3>
+      <h3><i class="ph ph-book-open"></i> Docs</h3>
       <div class="docs-nav-grid">`;
   topic.docLinks.forEach(dl => {
     html += `<div class="docs-item">
       <div class="path">${topic.docsPath}</div>
-      <a href="${dl.url}" target="_blank">↗ ${dl.label}</a>
-      <div class="search-tip">💡 ${dl.tip}</div>
+      <a href="${dl.url}" target="_blank"><i class="ph ph-arrow-up-right"></i> ${dl.label}</a>
+      <div class="search-tip"><i class="ph ph-lightbulb"></i> ${dl.tip}</div>
     </div>`;
   });
   html += `</div></div>
@@ -1576,12 +2473,12 @@ function renderMain() {
     </div>`;
 
   if (qs.length === 0) {
-    html += `<div class="empty-state"><div class="icon">✅</div><p>No questions in this filter.</p></div>`;
+    html += `<div class="empty-state"><i class="ph ph-check-circle"></i><p>No questions in this filter.</p></div>`;
   } else {
     qs.forEach((q, i) => {
       const isKnown = state[q.id] === 'known';
       const needsReview = state[q.id] === 'review';
-      const statusText = isKnown ? '✅ Marked as known' : needsReview ? '⚠ Needs review' : '';
+      const statusText = isKnown ? '<i class="ph ph-check-circle"></i> Marked as known' : needsReview ? '<i class="ph ph-warning"></i> Needs review' : '';
       html += `
       <div class="q-card ${q.difficulty === 'fail' ? 'failed' : ''} ${isKnown ? 'known' : ''}" id="card-${q.id}">
         <div class="q-header" onclick="toggleCard('${q.id}')">
@@ -1593,12 +2490,12 @@ function renderMain() {
             ${q.difficulty === 'medium' ? '<span class="tag tag-med">MEDIUM</span>' : ''}
             ${q.difficulty === 'easy' ? '<span class="tag tag-easy">EASY</span>' : ''}
           </span>
-          <span class="chevron">▶</span>
+          <i class="ph ph-caret-right chevron"></i>
         </div>
         <div class="q-body" id="body-${q.id}">
           <div class="q-scenario">${q.scenario}</div>
-          <button class="hint-btn" onclick="toggleHint('${q.id}')">📖 Show Docs Hint</button>
-          <button class="answer-btn" onclick="toggleAnswer('${q.id}')">✅ Show Answer</button>
+          <button class="hint-btn" onclick="toggleHint('${q.id}')"><i class="ph ph-book-open"></i> Show Docs Hint</button>
+          <button class="answer-btn" onclick="toggleAnswer('${q.id}')"><i class="ph ph-check-circle"></i> Show Answer</button>
           <div class="hint-panel" id="hint-${q.id}">
             <h4>Where to find this in the docs</h4>
             <div class="hint-row"><span class="hint-label">Path:</span> <span>${q.hint.path}</span></div>
@@ -1611,8 +2508,8 @@ function renderMain() {
             <pre>${escapeHtml(q.answer.yaml)}</pre>
           </div>
           <div class="mark-row">
-            <button class="mark-known" onclick="markCard('${q.id}','known')">✅ Got it</button>
-            <button class="mark-review" onclick="markCard('${q.id}','review')">🔄 Need more practice</button>
+            <button class="mark-known" onclick="markCard('${q.id}','known')"><i class="ph ph-check-circle"></i> Got it</button>
+            <button class="mark-review" onclick="markCard('${q.id}','review')"><i class="ph ph-arrows-clockwise"></i> Need more practice</button>
             <span class="mark-status">${statusText}</span>
           </div>
         </div>
@@ -1623,36 +2520,40 @@ function renderMain() {
 }
 
 function renderHome(main) {
-  const failQs = QUESTIONS.filter(q => q.difficulty === 'fail');
-  let html = `
-    <div class="topic-header"><h2>⎈ CKAD Dojo — Overview</h2></div>
-    <div class="alert-box">
-      <strong>Your 3 documented failures</strong><br>
-      LL1 Q2: NetworkPolicy — deleted it instead of adding an allow rule.<br>
-      LL2 Q2: CronJob — activeDeadlineSeconds at wrong YAML level.<br>
-      LL2 Q4: Ingress — used NodePort 30093 as backend port instead of the Service's ClusterIP port 8080.
-    </div>
-    <div class="overview-grid">`;
-  TOPICS.forEach(t => {
+  const renderCard = (t) => {
     const prog = getTopicProgress(t.id);
     const pct  = prog.total ? Math.round(prog.known / prog.total * 100) : 0;
     const failCount = QUESTIONS.filter(q => q.topic === t.id && q.difficulty === 'fail').length;
-    html += `
+    return `
       <div class="overview-card" onclick="showTopic('${t.id}')">
-        <h3>${t.icon} ${t.label}</h3>
+        <h3><i class="ph ph-${t.icon}"></i> ${t.label}</h3>
         <div class="oc-meta">${prog.total} questions${failCount ? ` · <span style="color:var(--red)">${failCount} from your fails</span>` : ''}</div>
         <div class="oc-progress"><div class="oc-fill" style="width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'}"></div></div>
         <div class="oc-stats"><span>${prog.known} known</span><span>${pct}%</span></div>
       </div>`;
-  });
+  };
+
+  const ckaTopics  = TOPICS.filter(t => t.cert === 'cka');
+  const ckadTopics = TOPICS.filter(t => (t.cert || 'ckad') === 'ckad');
+
+  let html = `
+    <h3 class="section-header" style="font-size:13px; color:var(--accent2); margin:8px 0 12px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700">CKA</h3>
+    <div class="overview-grid">`;
+  ckaTopics.forEach(t => { html += renderCard(t); });
   html += `</div>
-    <div class="docs-nav">
-      <h3>📖 Master Docs Navigation — Find Anything Fast</h3>
+
+    <h3 class="section-header" style="font-size:13px; color:var(--muted); margin:24px 0 12px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700">CKAD</h3>
+    <div class="overview-grid">`;
+  ckadTopics.forEach(t => { html += renderCard(t); });
+  html += `</div>
+
+    <div class="docs-nav" style="margin-top:24px">
+      <h3><i class="ph ph-book-open"></i> Docs Navigation</h3>
       <div class="docs-nav-grid">
-        <div class="docs-item"><div class="path">Exam search strategy</div><a href="https://kubernetes.io/docs/home/" target="_blank">↗ kubernetes.io/docs (start here)</a><div class="search-tip">💡 Use Ctrl+K or the search box. Search the resource type, not the task.</div></div>
-        <div class="docs-item"><div class="path">YAML scaffolding — fastest method</div><a href="https://kubernetes.io/docs/reference/kubectl/generated/" target="_blank">↗ kubectl reference (imperative commands)</a><div class="search-tip">💡 Generate YAML: kubectl create X --dry-run=client -o yaml</div></div>
-        <div class="docs-item"><div class="path">All resource types</div><a href="https://kubernetes.io/docs/reference/kubernetes-api/" target="_blank">↗ Kubernetes API reference</a><div class="search-tip">💡 Find exact field names and types here</div></div>
-        <div class="docs-item"><div class="path">Quick concepts index</div><a href="https://kubernetes.io/docs/concepts/" target="_blank">↗ Concepts overview</a><div class="search-tip">💡 NetworkPolicy, Ingress, Deployments, Storage all under Concepts</div></div>
+        <div class="docs-item"><div class="path">Exam search strategy</div><a href="https://kubernetes.io/docs/home/" target="_blank"><i class="ph ph-arrow-up-right"></i> kubernetes.io/docs (start here)</a><div class="search-tip"><i class="ph ph-lightbulb"></i> Use Ctrl+K or the search box. Search the resource type, not the task.</div></div>
+        <div class="docs-item"><div class="path">YAML scaffolding</div><a href="https://kubernetes.io/docs/reference/kubectl/generated/" target="_blank"><i class="ph ph-arrow-up-right"></i> kubectl reference (imperative commands)</a><div class="search-tip"><i class="ph ph-lightbulb"></i> Generate YAML: kubectl create X --dry-run=client -o yaml</div></div>
+        <div class="docs-item"><div class="path">All resource types</div><a href="https://kubernetes.io/docs/reference/kubernetes-api/" target="_blank"><i class="ph ph-arrow-up-right"></i> Kubernetes API reference</a><div class="search-tip"><i class="ph ph-lightbulb"></i> Find exact field names and types here</div></div>
+        <div class="docs-item"><div class="path">CKA: kubeadm + etcd</div><a href="https://kubernetes.io/docs/tasks/administer-cluster/" target="_blank"><i class="ph ph-arrow-up-right"></i> Tasks → Administer a Cluster</a><div class="search-tip"><i class="ph ph-lightbulb"></i> Cluster upgrades, etcd backup, kubeadm troubleshooting all live here</div></div>
       </div>
     </div>`;
   main.innerHTML = html;
