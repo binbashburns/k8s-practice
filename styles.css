@@ -1,41 +1,6 @@
-/* Palette tracks devsecops.binbashburns.com / binbashburns/security-stack-modeler.
-   Default :root is the warm cream-paper light theme; [data-theme="dark"] is Dracula. */
+/* Dracula palette. */
 
 :root {
-  --bg: #f4f1ea;
-  --surface: #fbf8f1;
-  --surface-alt: #efeadd;
-  --surface-warm: #f6efdf;
-  --surface-recess: #e9e3d3;
-  --border: rgba(60, 50, 30, 0.14);
-  --border-strong: rgba(60, 50, 30, 0.26);
-  --text: #2a2620;
-  --text-muted: #6b6457;
-  --text-subtle: #968f7e;
-  --accent: #6a5fcf;
-  --accent-soft: #e9e4f6;
-  --accent-deep: #4a3fb5;
-
-  --good: #3d8a64;
-  --good-bg: #e6f0e6;
-  --warn: #a17326;
-  --warn-bg: #f4ead4;
-  --bad:  #a85042;
-  --bad-bg: #f1e2db;
-  --info: #3d6cae;
-  --info-bg: #dfe7f3;
-
-  --shadow-sm: 0 1px 2px rgba(60, 50, 30, 0.04);
-  --shadow-card: 0 2px 12px rgba(60, 50, 30, 0.05), 0 0 1px rgba(60, 50, 30, 0.08);
-  --shadow-lift: 0 4px 18px rgba(60, 50, 30, 0.08);
-  --radius: 10px;
-  --radius-lg: 14px;
-
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-}
-
-[data-theme="dark"] {
-  /* Dracula */
   --bg: #282a36;
   --surface: #2d2f3d;
   --surface-alt: #383a4c;
@@ -59,9 +24,13 @@
   --info: #8be9fd;
   --info-bg: #1c2e34;
 
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
   --shadow-lift: 0 4px 22px rgba(0, 0, 0, 0.45);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

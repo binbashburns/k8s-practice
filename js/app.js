@@ -64,28 +64,8 @@ function toggleSidebar() {
   document.getElementById('sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
 }
 
-// Theme: persist in localStorage; default to dark to match the existing look.
-const THEME_KEY = 'k8s-practice-theme';
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const icon = document.getElementById('theme-icon');
-  if (icon) {
-    icon.className = theme === 'dark' ? 'ph ph-moon' : 'ph ph-sun';
-  }
-  document.querySelector('meta[name="theme-color"]').setAttribute(
-    'content', theme === 'dark' ? '#282a36' : '#f4f1ea'
-  );
-}
-function toggleTheme() {
-  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  localStorage.setItem(THEME_KEY, next);
-  applyTheme(next);
-}
-
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
 document.getElementById('menu-btn').addEventListener('click', toggleSidebar);
 document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
-document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 
 updateScoreBadge();
 renderSidebar();
