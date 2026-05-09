@@ -59,7 +59,7 @@ helm ls -n frontend-apd`
       tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata, without it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
     },
     answer: {
-      explanation: `<span class="highlight">helm repo update is mandatory</span> before upgrading to a new version, it syncs the local index with the remote repo. Without it, Helm won't know the new version exists.`,
+      explanation: `<span class="highlight">helm repo update is mandatory</span> before --version bumps. Without it the local index is stale and the new chart version won't resolve.`,
       yaml: `# SSH to the controlplane first
 ssh cluster3-controlplane
 

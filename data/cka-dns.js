@@ -11,7 +11,7 @@ const Q_CKA_DNS = [
     hint: {
       url: 'https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/',
       path: 'Concepts → Services, LB & Networking → DNS for Services and Pods',
-      tip: 'Use busybox:1.28 specifically, ewer busybox images break nslookup against CoreDNS. Pod DNS form: <a-b-c-d>.<ns>.pod.cluster.local (dashes, NOT dots, in the IP). Use kubectl run --rm -it --restart=Never to get a one-shot pod.'
+      tip: 'Use busybox:1.28 specifically; newer busybox images break nslookup against CoreDNS. Pod DNS form: <a-b-c-d>.<ns>.pod.cluster.local (dashes, not dots). kubectl run --rm -it --restart=Never for a one-shot pod.'
     },
     answer: {
       explanation: '<span class="highlight">Two gotchas:</span> (1) busybox >1.28 has a broken nslookup. (2) Pod DNS uses dashes in the IP and namespace.pod, while service uses service.namespace.svc.',

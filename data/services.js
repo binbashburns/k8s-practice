@@ -16,7 +16,7 @@ const Q_SERVICES = [
       tip: "Part I: kubectl get pods --show-labels, find labels UNIQUE to beta+gamma. Then kubectl create service clusterip radioactive-service --tcp=8080:80 --dry-run=client -o yaml > svc.yaml, edit the selector, apply. Part II: kubectl get pods -A -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP"
     },
     answer: {
-      explanation: '<span class="highlight">Key insight:</span> Use <code>kubectl get pods --show-labels</code> to spot that only beta and gamma share <code>mode=exam,type=external</code>. Dry-run generates the service YAML, then edit the selector before applying. For Part II, <code>custom-columns</code> with <code>--sort-by</code> is the exam-fast approach.',
+      explanation: '<code>kubectl get pods --show-labels</code> shows beta and gamma share <code>mode=exam,type=external</code>. Dry-run the service YAML, edit the selector, apply. Part II: <code>custom-columns</code> with <code>--sort-by</code>.',
       yaml: `# === Part I ===
 kubectl config use-context cluster2
 

@@ -190,7 +190,7 @@ spec:
       tip: 'securityContext goes under spec.containers[]. capabilities.add takes a list of strings. When recreating the pod, do NOT copy the auto-generated volumeMounts for service account tokens, those will fail.'
     },
     answer: {
-      explanation: `<span class="highlight">Gotcha from your notes:</span> When you exported and re-applied the pod YAML, it included a volumeMount for a kube-api-access token. That volume doesn't exist in the new pod spec and caused an error. Strip auto-generated fields when recreating pods.`,
+      explanation: `Strip auto-generated fields when recreating pods. <code>kubectl get pod -o yaml</code> includes a kube-api-access volumeMount that won't exist in the new pod spec and will fail apply.`,
       yaml: `apiVersion: v1
 kind: Pod
 metadata:

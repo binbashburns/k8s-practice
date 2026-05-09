@@ -14,7 +14,7 @@ const Q_CKA_ETCD = [
       tip: 'Search "backup etcd cluster", copy the snapshot save command. The exam wants: ETCDCTL_API=3 etcdctl snapshot save <path> --endpoints --cacert --cert --key. If unsure of cert paths, look in /etc/kubernetes/manifests/etcd.yaml.'
     },
     answer: {
-      explanation: '<span class="highlight">Memorize this one-liner.</span> All three TLS flags are mandatory or the snapshot save hangs. The cert paths come from the etcd static pod manifest.',
+      explanation: 'All three TLS flags are mandatory or the snapshot save hangs. Cert paths come from the etcd static pod manifest.',
       yaml: `# Always set v3 API
 export ETCDCTL_API=3
 
@@ -82,7 +82,7 @@ kubectl get nodes`
       tip: 'For kubeadm clusters, etcd runs as a static pod, its config lives in /etc/kubernetes/manifests/etcd.yaml. grep for "data-dir", "cert-file", "key-file", "trusted-ca-file" to extract every path.'
     },
     answer: {
-      explanation: "Always find paths from the live manifest, don't assume defaults. Different distros put certs in different places.",
+      explanation: "Pull paths from the live manifest. They vary by install.",
       yaml: `# Inspect the running etcd static pod manifest
 cat /etc/kubernetes/manifests/etcd.yaml | grep -E '(data-dir|cert-file|key-file|trusted-ca-file|listen-client-urls)'
 

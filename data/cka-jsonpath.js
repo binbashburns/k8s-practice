@@ -17,7 +17,7 @@ Sort by deployment name ascending.`,
       tip: 'Pattern: kubectl get <kind> -o custom-columns=<HEADER>:.<jsonpath>,<HEADER>:.<jsonpath> --sort-by=<jsonpath>. The cheat sheet has copy-paste examples, quicker than the JSONPath reference.'
     },
     answer: {
-      explanation: '<span class="highlight">Memorize this pattern.</span> The container image path uses <code>[]</code> (no index = first container). The <code>--sort-by</code> flag goes outside the custom-columns string. No spaces between fields, kubectl rejects them.',
+      explanation: 'Container image path uses <code>[]</code> (no index = first container). <code>--sort-by</code> goes outside the custom-columns string. No spaces between fields.',
       yaml: `kubectl -n admin2406 get deployment \\
   -o custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[].image,READY_REPLICAS:.status.readyReplicas,NAMESPACE:.metadata.namespace \\
   --sort-by=.metadata.name \\

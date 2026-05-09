@@ -14,7 +14,7 @@ const Q_CKA_UPGRADE = [
       tip: 'Use the version-pinned doc URL: v1-35.docs.kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/. The apt sources line MUST match your target minor (pkgs.k8s.io/core:/stable:/v1.35/deb/). Sequence: drain → unhold → install kubeadm → upgrade plan → upgrade apply → install kubelet+kubectl → daemon-reload → restart kubelet → uncordon.'
     },
     answer: {
-      explanation: `<span class="highlight">Two easy-to-miss steps:</span> (1) update <code>/etc/apt/sources.list.d/kubernetes.list</code> to the new minor version's repo before <code>apt update</code>. (2) <code>apt-mark unhold</code> kubeadm/kubelet/kubectl before install, then <code>apt-mark hold</code> after.`,
+      explanation: `Two steps that fail silently if skipped: (1) update <code>/etc/apt/sources.list.d/kubernetes.list</code> to the target minor before <code>apt update</code>. (2) <code>apt-mark unhold</code> kubeadm/kubelet/kubectl, install, then <code>apt-mark hold</code>.`,
       yaml: `# 1. Drain the controlplane
 kubectl drain controlplane --ignore-daemonsets
 

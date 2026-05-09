@@ -138,19 +138,18 @@ function renderTopic(main) {
     });
   }
 
-  // Bottom-of-page Lock-in panel: per-topic gotchas with concrete commands.
-  // Rendered after the question cards (BLUF-style takeaway, deliberately at the bottom per request).
-  if (Array.isArray(topic.lockIn) && topic.lockIn.length) {
+  // Per-topic gotchas with concrete commands. Renders below the question cards.
+  if (Array.isArray(topic.gotchas) && topic.gotchas.length) {
     html += `
-      <div class="lockin-panel">
-        <h3><i class="ph ph-target"></i> Lock in</h3>
-        <div class="lockin-items">`;
-    topic.lockIn.forEach(item => {
+      <div class="gotchas-panel">
+        <h3><i class="ph ph-target"></i> Focus</h3>
+        <div class="gotchas-items">`;
+    topic.gotchas.forEach(item => {
       html += `
-          <div class="lockin-item">
-            <div class="lockin-title">${item.title}</div>
-            ${item.note ? `<div class="lockin-note">${item.note}</div>` : ''}
-            ${item.cmd ? `<pre class="lockin-cmd">${escapeHtml(item.cmd)}</pre>` : ''}
+          <div class="gotchas-item">
+            <div class="gotchas-title">${item.title}</div>
+            ${item.note ? `<div class="gotchas-note">${item.note}</div>` : ''}
+            ${item.cmd ? `<pre class="gotchas-cmd">${escapeHtml(item.cmd)}</pre>` : ''}
           </div>`;
     });
     html += `
@@ -160,7 +159,7 @@ function renderTopic(main) {
 
   if (Array.isArray(topic.kodekloud) && topic.kodekloud.length) {
     html += `
-      <div class="lockin-panel kk-panel">
+      <div class="gotchas-panel kk-panel">
         <h3><i class="ph ph-graduation-cap"></i> KodeKloud labs</h3>
         <ul class="kk-list">`;
     topic.kodekloud.forEach(item => {
