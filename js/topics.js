@@ -157,6 +157,7 @@ const TOPICS = [
   {
     id: 'cka-upgrade',
     cert: 'cka',
+    focus: true,
     label: 'kubeadm Cluster Upgrades',
     icon: 'arrow-fat-line-up',
     docsUrl: 'https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/',
@@ -265,6 +266,7 @@ const TOPICS = [
   {
     id: 'cka-troubleshoot',
     cert: 'cka',
+    focus: true,
     label: 'Cluster Troubleshooting',
     icon: 'wrench',
     docsUrl: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/',
@@ -280,5 +282,5 @@ const TOPICS = [
   },
 ];
 
-const FOCUS_ORDER = ['cka-etcd', 'cka-crictl', 'cka-gateway', 'ingress', 'cka-cni', 'cka-helm'];
+const FOCUS_ORDER = ['cka-etcd', 'cka-crictl', 'cka-gateway', 'ingress', 'cka-cni', 'cka-helm', 'cka-troubleshoot', 'cka-upgrade'];
 const focusTopics = () => FOCUS_ORDER.map(id => TOPICS.find(t => t.id === id)).filter(Boolean);
