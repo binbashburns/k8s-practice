@@ -39,7 +39,7 @@ kubectl --kubeconfig=/root/CKA/admin.kubeconfig get nodes`
     id: 'cka-ts-2',
     topic: 'cka-troubleshoot',
     difficulty: 'hard',
-    title: 'kubectl not working at all, iagnose the control plane',
+    title: 'kubectl not working at all, diagnose the control plane',
     scenario: 'On <code>cluster2-controlplane</code>, kubectl commands fail (connection refused / timeout). Bring kubectl back to a working state.',
     hint: {
       url: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/',
@@ -86,10 +86,10 @@ kubectl get nodes`
     hint: {
       url: 'https://kubernetes.io/docs/concepts/policy/resource-quotas/',
       path: 'Concepts → Policies → Resource Quotas',
-      tip: `Trick wording,"limits" must not change, but the deployment's resource REQUESTS can be reduced (limits ≠ requests). kubectl describe rs to see the exact "exceeded quota" error. Lower spec.template.spec.containers[].resources.requests, then delete the old ReplicaSet to force the new pod template to take effect.`
+      tip: `Wording trap: "limits" must not change, but the deployment's resource REQUESTS can be reduced (limits ≠ requests). kubectl describe rs to see the exact "exceeded quota" error. Lower spec.template.spec.containers[].resources.requests, then delete the old ReplicaSet to force the new pod template to take effect.`
     },
     answer: {
-      explanation: '<span class="highlight">Wording trap:</span> "limits" in the prompt means the limits field, ou can still adjust <code>requests</code>. Reducing <code>requests.memory</code>/<code>cpu</code> fits the deployment under the quota, with limits untouched.',
+      explanation: '<span class="highlight">Wording trap:</span> "limits" in the prompt means the limits field; you can still adjust <code>requests</code>. Reducing <code>requests.memory</code>/<code>cpu</code> fits the deployment under the quota, with limits untouched.',
       yaml: `# 1. See the deployment status
 kubectl get deploy backend-api
 # Output: backend-api 2/3 ...
@@ -100,7 +100,7 @@ kubectl describe rs backend-api-7977bfdbd5
 # Look for: "exceeded quota: cpu-mem-quota,
 #            requested: requests.memory=128Mi, used: 256Mi, limited: 300Mi"
 
-# 3. Edit the deployment, educe REQUESTS only (limits unchanged)
+# 3. Edit the deployment, reduce REQUESTS only (limits unchanged)
 kubectl edit deployment backend-api
 # spec.template.spec.containers[].resources:
 #   requests:
@@ -129,7 +129,7 @@ kubectl describe quota cpu-mem-quota                # quota unchanged`
     hint: {
       url: 'https://kubernetes.io/docs/concepts/storage/persistent-volumes/#binding',
       path: 'Concepts → Storage → Persistent Volumes → Binding',
-      tip: "PVCs bind to PVs only when storage size, accessModes, and (if present) selector labels all match. kubectl describe pvc shows the binding error. Fix the PVC (or the deployment's PVC ref / volume mount), ever touch the PV."
+      tip: "PVCs bind to PVs only when storage size, accessModes, and (if present) selector labels all match. kubectl describe pvc shows the binding error. Fix the PVC (or the deployment's PVC ref / volume mount); never touch the PV."
     },
     answer: {
       explanation: 'Binding requires: PVC.requests.storage ≤ PV.capacity, accessModes overlap, and PVC.selector matches PV.labels (when set). Adjust the PVC, not the PV.',

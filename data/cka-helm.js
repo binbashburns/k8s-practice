@@ -56,7 +56,7 @@ helm ls -n frontend-apd`
     hint: {
       url: 'https://helm.sh/docs/helm/helm_upgrade/',
       path: 'helm.sh → Helm Commands → helm upgrade',
-      tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata, ithout it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
+      tip: 'Always run "helm repo update" before upgrading to fetch the latest chart metadata, without it you may not see the new version. The --version flag pins the chart version (not the app version). --set overrides a single values.yaml key inline.'
     },
     answer: {
       explanation: `<span class="highlight">helm repo update is mandatory</span> before upgrading to a new version, it syncs the local index with the remote repo. Without it, Helm won't know the new version exists.`,

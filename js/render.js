@@ -137,6 +137,44 @@ function renderTopic(main) {
       </div>`;
     });
   }
+
+  // Bottom-of-page Lock-in panel: per-topic gotchas with concrete commands.
+  // Rendered after the question cards (BLUF-style takeaway, deliberately at the bottom per request).
+  if (Array.isArray(topic.lockIn) && topic.lockIn.length) {
+    html += `
+      <div class="lockin-panel">
+        <h3><i class="ph ph-target"></i> Lock in</h3>
+        <div class="lockin-items">`;
+    topic.lockIn.forEach(item => {
+      html += `
+          <div class="lockin-item">
+            <div class="lockin-title">${item.title}</div>
+            ${item.note ? `<div class="lockin-note">${item.note}</div>` : ''}
+            ${item.cmd ? `<pre class="lockin-cmd">${escapeHtml(item.cmd)}</pre>` : ''}
+          </div>`;
+    });
+    html += `
+        </div>
+      </div>`;
+  }
+
+  if (Array.isArray(topic.kodekloud) && topic.kodekloud.length) {
+    html += `
+      <div class="lockin-panel kk-panel">
+        <h3><i class="ph ph-graduation-cap"></i> KodeKloud labs</h3>
+        <ul class="kk-list">`;
+    topic.kodekloud.forEach(item => {
+      html += `
+          <li>
+            <span class="kk-lab">${item.lab}</span>
+            ${item.module ? `<span class="kk-module">${item.module}</span>` : ''}
+          </li>`;
+    });
+    html += `
+        </ul>
+      </div>`;
+  }
+
   main.innerHTML = html;
 }
 

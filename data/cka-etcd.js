@@ -82,7 +82,7 @@ kubectl get nodes`
       tip: 'For kubeadm clusters, etcd runs as a static pod, its config lives in /etc/kubernetes/manifests/etcd.yaml. grep for "data-dir", "cert-file", "key-file", "trusted-ca-file" to extract every path.'
     },
     answer: {
-      explanation: "Always find paths from the live manifest, on't assume defaults. Different distros put certs in different places.",
+      explanation: "Always find paths from the live manifest, don't assume defaults. Different distros put certs in different places.",
       yaml: `# Inspect the running etcd static pod manifest
 cat /etc/kubernetes/manifests/etcd.yaml | grep -E '(data-dir|cert-file|key-file|trusted-ca-file|listen-client-urls)'
 
@@ -91,7 +91,7 @@ cat /etc/kubernetes/manifests/etcd.yaml | grep -E '(data-dir|cert-file|key-file|
 #   --key-file=/etc/kubernetes/pki/etcd/server.key
 #   --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
 #   --data-dir=/var/lib/etcd
-#   --listen-client-urls=https://127.0.0.1:2379, ttps://10.x.x.x:2379
+#   --listen-client-urls=https://127.0.0.1:2379,https://10.x.x.x:2379
 
 # Take the snapshot
 ETCDCTL_API=3 etcdctl snapshot save /opt/cluster-backup.db \\

@@ -11,7 +11,7 @@ const Q_CKA_CNI = [
     hint: {
       url: 'https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart',
       path: 'docs.tigera.io → Calico → Quickstart for Kubernetes',
-      tip: 'Two manifests: tigera-operator.yaml (the operator itself) + custom-resources.yaml (the Installation CR with your CIDR). Use kubectl create (NOT apply) on tigera-operator.yaml, pply hits a 262144-byte annotation limit. Edit the CIDR in custom-resources.yaml before applying.'
+      tip: 'Two manifests: tigera-operator.yaml (the operator itself) + custom-resources.yaml (the Installation CR with your CIDR). Use kubectl create (NOT apply) on tigera-operator.yaml, apply hits a 262144-byte annotation limit. Edit the CIDR in custom-resources.yaml before applying.'
     },
     answer: {
       explanation: `<span class="highlight">The "kubectl apply" trap:</span> tigera-operator.yaml has a CRD with annotations that exceed apply's 262144-byte limit. Use <code>kubectl create -f</code> instead.`,

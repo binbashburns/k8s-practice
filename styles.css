@@ -286,6 +286,51 @@ pre { font-family: var(--font-mono); font-size: 11.5px; line-height: 1.6; color:
 .focus-card .fc-progress { height: 3px; background: var(--surface-alt); border-radius: 2px; overflow: hidden; margin-top: 10px; }
 .focus-card .fc-fill { height: 100%; background: var(--accent); transition: width .3s; }
 
+/* Lock-in + KodeKloud panels (bottom of topic page) */
+.lockin-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+.lockin-panel.kk-panel { border-left-color: var(--info); }
+.lockin-panel h3 { font-size: 12px; font-weight: 700; color: var(--warn); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
+.lockin-panel.kk-panel h3 { color: var(--info); }
+.lockin-panel h3 .ph { font-size: 14px; margin-right: 6px; vertical-align: -0.18em; }
+.lockin-items { display: flex; flex-direction: column; gap: 14px; }
+.lockin-item { padding-bottom: 12px; border-bottom: 1px dashed var(--border); }
+.lockin-item:last-child { border-bottom: none; padding-bottom: 0; }
+.lockin-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.4; }
+.lockin-note { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px; }
+.lockin-cmd {
+  background: var(--surface-recess);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text);
+  overflow-x: auto;
+}
+.kk-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.kk-list li { display: flex; align-items: baseline; gap: 10px; font-size: 13px; padding: 4px 0; }
+.kk-list li::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--info);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.kk-lab { color: var(--text); font-weight: 600; }
+.kk-module { color: var(--text-muted); font-size: 11px; font-style: italic; }
+.kk-module::before { content: '· '; }
+
 /* Misc */
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
