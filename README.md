@@ -1,16 +1,18 @@
-# CKAD Practice Dojo
+# k8s-practice
 
-A single-file browser app for drilling CKAD weak spots before exam day.
+Single-file browser app for drilling CKA and CKAD topics.
 
-![CKAD Practice Dojo](img/ckad.png)
+![screenshot](img/ckad.png)
 
 ## What it does
 
-- Organizes practice questions by CKAD topic (Network Policies, Ingress, CronJobs & Jobs, Observability, App Design & Build, App Deployment)
-- Tracks which questions you've answered correctly ("Known") per topic
-- Logs documented failures — mistakes you've made before — so you don't repeat them
-- Includes a quick-reference nav panel with links to the Kubernetes docs, `kubectl` imperative commands, and YAML scaffolding tips
+- Practice questions grouped by topic, with a "Focus" section at the top for current priorities
+- Per-question docs hint and answer panels
+- Tracks "known" status per topic in `localStorage`
+- Priority items get a red border and a Priority filter
 
 ## Usage
 
-Just open `index.html` in a browser. No build step, no dependencies.
+Open `index.html` in a browser. No build step, no dependencies.
+
+Live at https://k8s.binbashburns.com (deployed via GitHub Pages).
