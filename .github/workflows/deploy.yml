@@ -7,6 +7,7 @@ on:
       - 'index.html'
       - 'styles.css'
       - 'js/**'
+      - 'data/**'
       - 'CNAME'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
@@ -37,6 +38,7 @@ jobs:
           cp index.html _site/
           cp styles.css _site/
           cp -r js _site/
+          cp -r data _site/
           cp CNAME _site/
           touch _site/.nojekyll
 
