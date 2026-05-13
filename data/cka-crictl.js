@@ -79,8 +79,8 @@ kubectl get pods -A | grep nginx-static     # should show as nginx-static-contro
     title: 'Pull an image manually with crictl and pre-warm a node',
     scenario: 'Worker <code>node01</code> runs slow on first scheduling because images aren\'t cached. Pre-pull <code>nginx:1.25-alpine</code> directly on the node using crictl, then verify it lands in the runtime\'s image store.',
     hint: {
-      url: 'https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md',
-      path: 'cri-tools → crictl reference',
+      url: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/',
+      path: 'Tasks → Monitoring, Logging, Debugging → Debugging nodes with crictl',
       tip: 'crictl pull <image> talks to the configured CRI endpoint and pulls into the runtime\'s image store (containerd in modern kubeadm clusters). crictl images lists the local image cache. Useful when you need to test image availability before trusting kubectl.'
     },
     answer: {

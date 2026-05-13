@@ -76,5 +76,35 @@ helm upgrade lvm-crystal-apd lvm-crystal-apd/nginx \\
 helm ls -n crystal-apd-ns
 kubectl get pods -n crystal-apd-ns`
     }
+  },
+  {
+    id: 'cka-helm-3',
+    topic: 'cka-helm',
+    difficulty: 'medium',
+    title: 'Lint a local chart, install as new release, uninstall old release',
+    scenario: 'Release <code>webpage-server-01</code> is deployed in the default namespace. A new chart sits at <code>/root/new-version</code>. Lint it, install as a new release named <code>webpage-server-02</code>, then uninstall <code>webpage-server-01</code>.',
+    hint: {
+      url: 'https://helm.sh/docs/helm/helm_lint/',
+      path: 'helm.sh → Helm Commands → helm lint',
+      tip: 'helm lint ./path validates chart structure. helm install <release> ./path. helm uninstall <release> -n <ns> removes a release. helm ls -A to confirm what is installed before and after.'
+    },
+    answer: {
+      explanation: 'Lint before install to catch template/syntax errors. Names are arbitrary, the new release simply runs alongside the old until you uninstall it.',
+      yaml: `# 1. See current releases
+helm ls -n default
+
+# 2. Lint the new chart
+cd /root
+helm lint ./new-version
+
+# 3. Install as new release
+helm install webpage-server-02 ./new-version
+
+# 4. Uninstall the old release
+helm uninstall webpage-server-01 -n default
+
+# 5. Verify
+helm ls -n default`
+    }
   }
 ];

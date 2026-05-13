@@ -4,6 +4,7 @@
 const TOPICS = [
   {
     id: 'network-policy',
+    focus: true,
     label: 'Network Policies',
     icon: 'shield-check',
     docsUrl: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
@@ -117,6 +118,7 @@ kubectl apply -f ing-ctrl.yaml`
   },
   {
     id: 'design-build',
+    focus: true,
     label: 'App Design & Build',
     icon: 'blueprint',
     docsUrl: 'https://kubernetes.io/docs/concepts/workloads/pods/init-containers/',
@@ -148,6 +150,7 @@ kubectl apply -f ing-ctrl.yaml`
   },
   {
     id: 'deployment',
+    focus: true,
     label: 'App Deployment',
     icon: 'rocket-launch',
     docsUrl: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/',
@@ -364,6 +367,7 @@ kubectl drain node01 --ignore-daemonsets`
   {
     id: 'cka-csr-rbac',
     cert: 'cka',
+    focus: true,
     label: 'CSR & RBAC Users',
     icon: 'key',
     docsUrl: 'https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/',
@@ -563,6 +567,37 @@ helm install webapp-color-apd ./webapp-color-apd -n frontend-apd`
     ]
   },
   {
+    id: 'cka-storage',
+    cert: 'cka',
+    focus: true,
+    label: 'StorageClasses & PV/PVC',
+    icon: 'hard-drives',
+    docsUrl: 'https://kubernetes.io/docs/concepts/storage/storage-classes/',
+    docsPath: 'Concepts → Storage → Storage Classes',
+    searchTip: 'Search "storage class" for the StorageClass kind, "persistent volumes" for PV/PVC binding rules.',
+    subtitle: 'StorageClass top-level fields, PVC binding (accessModes, size, storageClassName, selector).',
+    docLinks: [
+      { label: 'Storage Classes', url: 'https://kubernetes.io/docs/concepts/storage/storage-classes/', tip: 'provisioner, volumeBindingMode, allowVolumeExpansion' },
+      { label: 'Persistent Volumes', url: 'https://kubernetes.io/docs/concepts/storage/persistent-volumes/', tip: 'Lifecycle, accessModes, reclaim policy' },
+      { label: 'PV/PVC binding', url: 'https://kubernetes.io/docs/concepts/storage/persistent-volumes/#binding', tip: 'accessModes + size + storageClassName + selector' },
+    ]
+  },
+  {
+    id: 'cka-scheduling',
+    cert: 'cka',
+    focus: true,
+    label: 'Scheduling: Priority & Taints',
+    icon: 'queue',
+    docsUrl: 'https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/',
+    docsPath: 'Concepts → Scheduling, Preemption, Eviction → Taints and Tolerations',
+    searchTip: 'Search "taints", "priority class", or "tolerations". Both Pod priority and taints sit under Scheduling, Preemption, Eviction.',
+    subtitle: 'PriorityClass + priorityClassName, kubectl taint, pod tolerations.',
+    docLinks: [
+      { label: 'Taints and Tolerations', url: 'https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/', tip: 'key/operator/value/effect' },
+      { label: 'Pod Priority and Preemption', url: 'https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/', tip: 'PriorityClass + priorityClassName' },
+    ]
+  },
+  {
     id: 'cka-troubleshoot',
     cert: 'cka',
     focus: true,
@@ -639,5 +674,8 @@ kubectl get pods -n kube-system | grep apiserver`
   },
 ];
 
-const FOCUS_ORDER = ['cka-etcd', 'cka-crictl', 'cka-gateway', 'ingress', 'cka-cni', 'cka-helm', 'cka-troubleshoot', 'cka-upgrade'];
+const FOCUS_ORDER = [
+  'cka-etcd', 'cka-crictl', 'cka-gateway', 'ingress', 'cka-cni', 'cka-helm', 'cka-troubleshoot', 'cka-upgrade',
+  'cka-scheduling', 'cka-storage', 'cka-csr-rbac', 'network-policy', 'design-build', 'deployment'
+];
 const focusTopics = () => FOCUS_ORDER.map(id => TOPICS.find(t => t.id === id)).filter(Boolean);

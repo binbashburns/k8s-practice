@@ -88,5 +88,50 @@ kubectl auth can-i update configmap/other      --as=maint -n secure-ns   # no
 #   resourceNames: ["app-config"]   # the restriction
 #   verbs: ["get", "update"]`
     }
+  },
+  {
+    id: 'cka-csr-3',
+    topic: 'cka-csr-rbac',
+    difficulty: 'medium',
+    title: 'ServiceAccount + ClusterRole listing PVs, bound to a pvviewer pod',
+    scenario: 'Create ServiceAccount <code>pvviewer</code> in <code>default</code>. Grant it permission to <code>list</code> all PersistentVolumes by creating ClusterRole <code>pvviewer-role</code> and ClusterRoleBinding <code>pvviewer-role-binding</code>. Then create a pod named <code>pvviewer</code> using image <code>redis</code> and serviceAccountName <code>pvviewer</code> in <code>default</code>.',
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/',
+      path: 'Tasks → Configure Pods and Containers → Configure Service Accounts for Pods',
+      tip: 'kubectl create serviceaccount, kubectl create clusterrole --resource=persistentvolumes --verb=list, kubectl create clusterrolebinding --clusterrole=... --serviceaccount=<ns>:<name>. The pod spec needs serviceAccountName (camelCase) at spec level.'
+    },
+    answer: {
+      explanation: 'PVs are cluster-scoped, so a ClusterRole + ClusterRoleBinding is required (a namespaced Role cannot grant access to cluster-scoped resources). <code>--serviceaccount=default:pvviewer</code> in the binding command uses <code>namespace:name</code> form.',
+      yaml: `# 1. ServiceAccount
+kubectl create serviceaccount pvviewer
+
+# 2. ClusterRole
+kubectl create clusterrole pvviewer-role \\
+  --resource=persistentvolumes --verb=list
+
+# 3. ClusterRoleBinding (note namespace:name syntax)
+kubectl create clusterrolebinding pvviewer-role-binding \\
+  --clusterrole=pvviewer-role \\
+  --serviceaccount=default:pvviewer
+
+# 4. Pod with serviceAccountName
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvviewer
+  labels:
+    run: pvviewer
+spec:
+  serviceAccountName: pvviewer
+  containers:
+  - name: pvviewer
+    image: redis
+EOF
+
+# 5. Verify
+kubectl auth can-i list pv --as=system:serviceaccount:default:pvviewer  # yes
+kubectl get pod pvviewer -o jsonpath='{.spec.serviceAccountName}'`
+    }
   }
 ];

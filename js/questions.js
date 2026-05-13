@@ -20,5 +20,7 @@ const QUESTIONS = [
   ...Q_CKA_CNI,
   ...Q_CKA_GATEWAY,
   ...Q_CKA_HELM,
+  ...Q_CKA_STORAGE,
+  ...Q_CKA_SCHEDULING,
   ...Q_CKA_TROUBLESHOOT,
 ];

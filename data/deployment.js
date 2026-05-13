@@ -180,5 +180,45 @@ rules:
   resourceNames: ["ckad-cnfmp-aecs"]  # restricts to this specific instance
   verbs: ["update", "get"]`
     }
+  },
+  {
+    id: 'dep-hpa-1',
+    topic: 'deployment',
+    difficulty: 'medium',
+    title: 'HPA scaling on a custom Pod metric (requests_per_second, AverageValue)',
+    scenario: 'Create an HPA <code>api-hpa</code> for Deployment <code>api-deployment</code> in namespace <code>api</code>. Scale on custom metric <code>requests_per_second</code> with target <code>AverageValue: 1000</code>. <code>minReplicas: 1</code>, <code>maxReplicas: 20</code>. Errors about the metric not being tracked by metrics-server can be ignored.',
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/',
+      path: 'Tasks → Run Applications → Horizontal Pod Autoscaling',
+      tip: 'autoscaling/v2 supports custom metrics. type: Pods with target.type: AverageValue means "average value across all pods". Use kubectl create -f api-hpa.yaml (kubectl autoscale only covers CPU/memory).'
+    },
+    answer: {
+      explanation: 'Custom pod metrics use <code>type: Pods</code> + <code>target.type: AverageValue</code>. The <code>averageValue</code> is a quantity (string), the API expects <code>"1000"</code> in quotes.',
+      yaml: `apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  namespace: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-deployment
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "1000"
+
+# Apply and inspect
+kubectl create -f api-hpa.yaml
+kubectl get hpa -n api api-hpa
+kubectl describe hpa -n api api-hpa`
+    }
   }
 ];

@@ -68,5 +68,45 @@ kubectl apply -f web-gateway.yaml
 # Verify
 kubectl get gateway -n cka5673 web-gateway -o yaml | grep -A6 listeners`
     }
+  },
+  {
+    id: 'cka-gw-3',
+    topic: 'cka-gateway',
+    difficulty: 'medium',
+    title: 'HTTPRoute weighted split: 80% to web-service, 20% to web-service-v2',
+    scenario: 'A Gateway <code>web-gateway</code> and Services <code>web-service</code> and <code>web-service-v2</code> already exist in <code>default</code>. Create HTTPRoute <code>web-route</code> in <code>default</code> attached to <code>web-gateway</code>: traffic at path <code>/</code> splits 80/20 between <code>web-service</code> and <code>web-service-v2</code> (both on port 80).',
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/gateway/',
+      path: 'Concepts → Services, LB & Networking → Gateway API',
+      tip: 'Multiple backendRefs under one rule each carry a weight; the controller normalises weights to produce the split. parentRefs binds the route to the Gateway. apiVersion: gateway.networking.k8s.io/v1 (not networking.k8s.io).'
+    },
+    answer: {
+      explanation: 'Weighted backends live under a single <code>rules[]</code> entry with two <code>backendRefs</code>. Weights do not need to sum to 100, the controller normalises them, but 80 + 20 makes the intent obvious.',
+      yaml: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: web-gateway
+    namespace: default
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: web-service
+      port: 80
+      weight: 80
+    - name: web-service-v2
+      port: 80
+      weight: 20
+
+# Apply and inspect
+kubectl apply -f web-route.yaml
+kubectl describe httproute web-route -n default`
+    }
   }
 ];

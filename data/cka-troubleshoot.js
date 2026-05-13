@@ -162,5 +162,41 @@ kubectl edit deploy alpha-mysql -n alpha
 kubectl get pvc -n alpha            # Bound
 kubectl get pods -n alpha           # Running`
     }
+  },
+  {
+    id: 'cka-ts-6',
+    topic: 'cka-troubleshoot',
+    difficulty: 'hard',
+    title: 'Deployment scale has no effect: kube-controller-manager binary typo',
+    scenario: 'Deployment <code>nginx-deploy</code> is scaled to 3 replicas but the replica count does not change. Inspect control-plane components in <code>kube-system</code>. The <code>kube-controller-manager</code> static pod manifest has a typo in the binary name (a digit <code>1</code> in place of letter <code>l</code>). Fix it so the controller-manager runs and the scale takes effect.',
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/debug/debug-cluster/',
+      path: 'Tasks → Monitoring, Logging, Debugging → Troubleshooting Clusters',
+      tip: 'kubectl get pods -n kube-system; if controller-manager is missing or crashlooping, look at /etc/kubernetes/manifests/kube-controller-manager.yaml. The command field invokes a binary path, typos like kube-contro1ler-manager (number 1) silently break the static pod. Fix with sed -i then wait ~20s for kubelet to pick it up.'
+    },
+    answer: {
+      explanation: 'The controller-manager is responsible for ReplicaSet scaling. With its static pod broken, <code>kubectl scale</code> records the new replica count but no controller acts on it. The kubelet auto-restarts the static pod within ~20s of the manifest edit.',
+      yaml: `# 1. Issue the scale (records the desired count)
+kubectl scale deploy nginx-deploy --replicas=3
+
+# 2. Inspect control plane pods
+kubectl get pods -n kube-system
+# kube-controller-manager-* is missing or CrashLoopBackOff
+
+# 3. Inspect the manifest
+grep command -A2 /etc/kubernetes/manifests/kube-controller-manager.yaml
+#   - kube-contro1ler-manager   <-- digit '1' instead of letter 'l'
+
+# 4. Fix the binary name (l vs 1)
+sudo sed -i 's/kube-contro1ler-manager/kube-controller-manager/g' \\
+  /etc/kubernetes/manifests/kube-controller-manager.yaml
+
+# 5. Wait for kubelet to restart the static pod (~20s)
+kubectl get pods -n kube-system | grep controller-manager
+
+# 6. Verify scale took effect
+kubectl get deploy nginx-deploy
+# READY 3/3`
+    }
   }
 ];

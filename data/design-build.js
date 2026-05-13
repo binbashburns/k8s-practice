@@ -307,5 +307,33 @@ spec:
 
 kubectl create -f /root/ckad19-crd-aecs.yaml`
     }
+  },
+  {
+    id: 'db-cm-1',
+    topic: 'design-build',
+    difficulty: 'medium',
+    title: 'ConfigMap (ENV + LOG_LEVEL) wired into an existing Deployment',
+    scenario: 'Create ConfigMap <code>app-config</code> in namespace <code>cm-namespace</code> with <code>ENV=production</code> and <code>LOG_LEVEL=info</code>. Modify the existing Deployment <code>cm-webapp</code> in the same namespace so its container reads both env vars from this ConfigMap.',
+    hint: {
+      url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/',
+      path: 'Tasks → Configure Pods and Containers → Configure a Pod to Use a ConfigMap',
+      tip: 'kubectl create configmap app-config --from-literal=KEY=VALUE (repeat per key). For the deployment, kubectl set env deploy/<name> --from=configmap/app-config injects every key as an env var (uses envFrom under the hood).'
+    },
+    answer: {
+      explanation: 'Imperative end-to-end: <code>kubectl create configmap --from-literal</code> for the data, then <code>kubectl set env ... --from=configmap/</code> to wire it into the deployment via <code>envFrom</code>. Pods restart automatically.',
+      yaml: `# 1. ConfigMap
+kubectl create configmap app-config -n cm-namespace \\
+  --from-literal=ENV=production \\
+  --from-literal=LOG_LEVEL=info
+
+# 2. Wire it into the deployment (envFrom)
+kubectl set env deployment/cm-webapp -n cm-namespace \\
+  --from=configmap/app-config
+
+# 3. Verify
+kubectl get cm app-config -n cm-namespace -o yaml
+kubectl set env deploy/cm-webapp -n cm-namespace --list
+kubectl exec -n cm-namespace deploy/cm-webapp -- env | grep -E '^(ENV|LOG_LEVEL)='`
+    }
   }
 ];

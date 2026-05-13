@@ -181,5 +181,39 @@ kubectl -n ns-new-ckad edit netpol backend-egress-restricted
 #   egress:
 #   - {}   # allow ALL egress`
     }
+  },
+  {
+    id: 'np-5',
+    topic: 'network-policy',
+    difficulty: 'medium',
+    title: 'Allow ingress from all sources to np-test-1 on port 80 (default-deny stays)',
+    scenario: 'In <code>default</code>, pod <code>np-test-1</code> and service <code>np-test-service</code> exist. A default-deny NetworkPolicy is blocking ingress. Create a NetworkPolicy <code>ingress-to-nptest</code> that allows ingress to <code>np-test-1</code> on TCP 80 from any source. <strong>Do not delete the default-deny.</strong>',
+    hint: {
+      url: 'https://kubernetes.io/docs/concepts/services-networking/network-policies/',
+      path: 'Concepts → Services, LB & Networking → Network Policies',
+      tip: 'An ingress rule with ports but no from: matches all sources. podSelector targets the pod by label (kubectl get pod np-test-1 --show-labels to find the right key). NetworkPolicies are additive, the default-deny stays in place.'
+    },
+    answer: {
+      explanation: 'Omitting <code>from:</code> under <code>ingress[]</code> means "from anywhere"; the <code>ports</code> list still constrains to TCP 80. The default-deny is unaffected, both policies apply.',
+      yaml: `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-to-nptest
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      run: np-test-1
+  policyTypes:
+  - Ingress
+  ingress:
+  - ports:                # no "from:" = allow from anywhere
+    - protocol: TCP
+      port: 80
+
+# Verify reachability
+kubectl run test-conn --image=busybox --restart=Never --rm -it -- \\
+  wget -qO- -T 5 http://np-test-service`
+    }
   }
 ];
